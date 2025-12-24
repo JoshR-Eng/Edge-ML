@@ -9,7 +9,6 @@
 	outputs = { self, nixpkgs, utils }:
     utils.lib.eachDefaultSystem (system:
 		  let
-			  system = "aarch64-linux";
 			  pkgs = import nixpkgs { inherit system; };
 
 		  in {
@@ -44,31 +43,40 @@
             shellHook = ''
               echo "--- Edge-ML Shell Activated ---"
               echo "    System: ${system}"
+              echo ""
+
 
               # Load into Python venv for pip packages 
               if [ ! -d ".venv" ]; then
                 echo "Creating virtual environment..."
                 python -m venv .venv
               fi
+              echo "Enabling Virtual Envirnonment"
+              echo "Installing pip dependencies..."
               source .venv/bin/activate
-              
+              pip3 install -r requirements.txt
+             
+
               # Instructions if testing on PC or on Edge
-              if [[ "${system}" == "aarch64-linux" ]] then
+              if [[ "${system}" == "aarch64-linux" ]]; then
                 echo ""
                 echo "Device: NVIDIA JETSON"
                 echo "installing hardware dependencies via pip"
                 pip install jetson-stats
                 pip install onnxruntime-gpu --extra-index-url https://pypi.ngc.nvidia.com
-              
-              else 
+             
+              elif [[ "${system}" == "x86_64-linux" ]]; then 
                 echo ""
                 echo "Device: HOST"
                 echo "Installing dependencies for testing"
                 pip install onnxruntime 
-              fi 
+              
+              else 
+                echo ""
+                echo "ERROR: Device Architecture Unknown"
+              fi
             '';
 				  };
-			  };
+			  }
       );		
-    };
 }
