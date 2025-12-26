@@ -11,7 +11,10 @@ DESCRIPTION: A background script to log the Jetson Orions
 #include <string.h>
 #include <time.h>
 
-// --- Configuration ---
+// =====================================================================
+//                      --- Configuration ---
+// =====================================================================
+
 // Need to update these to match Orion Path
 
 #define GPU_LOAD          "..."
@@ -19,7 +22,12 @@ DESCRIPTION: A background script to log the Jetson Orions
 #define LOG_FILE          "..."
 #define SAMPLING_RATE_MS  100
 
-// --- Metric Func. ---
+
+
+// =====================================================================
+//                    --- Func. to get values ---
+// =====================================================================
+
 // CPU Calculation
 typedef struct {
   unsigned long long user;
@@ -50,4 +58,67 @@ double calculate_cpu_usage(CpuStats *prev, CpuStats *curr) {
 
 // Get integer values Power, GPU
 int read_sys_int(const char *path) { 
+  FILE *fp = fopen(path, "r");
+  if (!fp) return;
+  int val = 0;
+  if (fscanf(fp, "%d, &val") != 1) val = -1;
+  fclose(fp);
+  return val;
+}
+
+
+// =====================================================================
+//                      --- Main Functions ---
+// =====================================================================
+
+int main() {
+  printf("Logging Hardware Metrics to: %s\n", LOG_FILE);
+  
+  // Open log file to write mode
+  FILE *log = fopen(LOG_FILE, "w");
+  if (!log) { perror("Failed to open log file"); return 1; };
+
+  // CSV Header
+  fprint( log, "Timestamp,CPU_Usage,GPU_Usage,Power\n");
+  fflush(log);
+
+  // Define Struct variables
+  CpuStats cpu_prev, cpu_curr;
+  get_cpu_stats(&cpu_prev);
+
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  double start_time = ts.tv_sec + ts.tv_nsec * 1e-9;
+
+  while (1) {
+    nanosleep(INTERVAL_MS * 1e6);
+
+    // CPU
+    get_cpu_stats(&cpu_curr);
+    double cpu_percent = calculate_cpu_usage(&cpu_prev, &cpu_curr);
+    cpu_prev = cpu_curr;
+
+    // GPU
+       // val is 0-1000 so div. by 10 for %
+    int gpu_raw = read_sys_int(GPU_LOAD);
+    double gpu_percentage = (gpu_raw >= 0) ? (gpu_raw / 10.0) : 0.0;
+    
+    // Power
+      // measures in milliwatts
+    int power_mw = read_sys_int(POWER);
+
+    // Timestamp
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    double now = ts.tv_sec + ts.tv_nsec * 1e-9;
+
+
+    // Log to file
+    fprint(log, "%.4f,%.2f,%.2f,%d\n", now - start_time, cpu_percent,
+           gpu_percent, power_mw);
+    fflush(log);
   }
+
+  fclose(log);
+  return 0;
+}
+
