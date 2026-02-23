@@ -30,7 +30,7 @@ set -euo pipefail  # exit on error
 # Resolve Paths -------------------------------------------------------------
 # REPO_ROOT is the directory this script lives in, so it works from any cwd.
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UTILS_DIR="$REPO_ROOT/src/utils"
+UTILS_DIR="$REPO_ROOT/src/quantise"
 
 
 
