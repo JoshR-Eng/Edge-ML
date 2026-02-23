@@ -1,0 +1,20 @@
+
+ --- Training Experiment: v1/CNN-GRU ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.004785 | Val RMSE: 0.02371
+	Epoch 020/150 | Train Loss: 0.002569 | Val RMSE: 0.02032
+	Epoch 030/150 | Train Loss: 0.001888 | Val RMSE: 0.03668
+	Epoch 040/150 | Train Loss: 0.001672 | Val RMSE: 0.01070
+	Epoch 050/150 | Train Loss: 0.001472 | Val RMSE: 0.03439
+	Epoch 060/150 | Train Loss: 0.001145 | Val RMSE: 0.01163
+
+Early stopping at epoch 62 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 99.0s
+	Best RMSE: 0.01065
+	Model Saved: /home/joshr/batt_ml/results/v1/CNN-GRU/CNN-GRU.pth
+Exporting to ONNX file type to './results/v1/CNN-GRU/CNN-GRU.onnx'...
+	Successfully Exported!

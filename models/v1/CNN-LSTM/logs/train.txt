@@ -1,0 +1,22 @@
+
+ --- Training Experiment: v1/CNN-LSTM ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.002955 | Val RMSE: 0.08265
+	Epoch 020/150 | Train Loss: 0.002095 | Val RMSE: 0.02607
+	Epoch 030/150 | Train Loss: 0.001670 | Val RMSE: 0.02512
+	Epoch 040/150 | Train Loss: 0.001425 | Val RMSE: 0.01763
+	Epoch 050/150 | Train Loss: 0.001324 | Val RMSE: 0.02839
+	Epoch 060/150 | Train Loss: 0.001184 | Val RMSE: 0.01302
+	Epoch 070/150 | Train Loss: 0.001077 | Val RMSE: 0.02520
+	Epoch 080/150 | Train Loss: 0.000944 | Val RMSE: 0.01325
+
+Early stopping at epoch 80 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 122.8s
+	Best RMSE: 0.01302
+	Model Saved: /home/joshr/batt_ml/results/v1/CNN-LSTM/CNN-LSTM.pth
+Exporting to ONNX file type to './results/v1/CNN-LSTM/CNN-LSTM.onnx'...
+	Successfully Exported!
