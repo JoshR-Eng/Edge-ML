@@ -91,8 +91,7 @@ int main() {
   double start_time = ts.tv_sec + ts.tv_nsec * 1e-9;
 
   while (1) {
-    nanosleep(INTERVAL_MS * 1e6);
-
+    usleep(SAMPLING_RATE_MS * 1e3)
     // CPU
     get_cpu_stats(&cpu_curr);
     double cpu_percent = calculate_cpu_usage(&cpu_prev, &cpu_curr);
