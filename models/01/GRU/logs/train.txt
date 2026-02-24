@@ -1,9 +1,0 @@
-
- --- Training Experiment: 01/GRU ---
-
-Starting Training Loop...
-	Epoch 010/150 | Train Loss: 0.000056 | Val RMSE: 0.00508
-	Epoch 020/150 | Train Loss: 0.000018 | Val RMSE: 0.00529
-	Epoch 030/150 | Train Loss: 0.000027 | Val RMSE: 0.00522
-	Epoch 040/150 | Train Loss: 0.000010 | Val RMSE: 0.00395
-	Epoch 050/150 | Train Loss: 0.000012 | Val RMSE: 0.00264

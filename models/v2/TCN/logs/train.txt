@@ -1,0 +1,20 @@
+
+ --- Training Experiment: v2/TCN ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.002375 | Val RMSE: 0.01471
+	Epoch 020/150 | Train Loss: 0.001512 | Val RMSE: 0.01511
+	Epoch 030/150 | Train Loss: 0.001321 | Val RMSE: 0.01832
+	Epoch 040/150 | Train Loss: 0.001134 | Val RMSE: 0.01699
+	Epoch 050/150 | Train Loss: 0.000997 | Val RMSE: 0.00882
+	Epoch 060/150 | Train Loss: 0.000949 | Val RMSE: 0.01101
+
+Early stopping at epoch 67 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 65.1s
+	Best RMSE: 0.00755
+	Model Saved: /home/joshr/batt_ml/results/v2/TCN/TCN.pth
+Exporting to ONNX file type to './results/v2/TCN/TCN.onnx'...
+	Successfully Exported!

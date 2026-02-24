@@ -1,0 +1,21 @@
+
+ --- Training Experiment: v2/GRU ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.000058 | Val RMSE: 0.00957
+	Epoch 020/150 | Train Loss: 0.000029 | Val RMSE: 0.00334
+	Epoch 030/150 | Train Loss: 0.000020 | Val RMSE: 0.00374
+	Epoch 040/150 | Train Loss: 0.000019 | Val RMSE: 0.01124
+	Epoch 050/150 | Train Loss: 0.000013 | Val RMSE: 0.00609
+	Epoch 060/150 | Train Loss: 0.000005 | Val RMSE: 0.00192
+	Epoch 070/150 | Train Loss: 0.000009 | Val RMSE: 0.00282
+
+Early stopping at epoch 79 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 57.7s
+	Best RMSE: 0.00094
+	Model Saved: /home/joshr/batt_ml/results/v2/GRU/GRU.pth
+Exporting to ONNX file type to './results/v2/GRU/GRU.onnx'...
+	Successfully Exported!
