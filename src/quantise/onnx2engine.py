@@ -74,7 +74,7 @@ BASE_FLAGS = [
 
 
 # ==========================================================================
-#                                CONFIG
+#                               MAIN 
 # ==========================================================================
 
 # Engine builders ----------------------------------------------------------
@@ -83,10 +83,13 @@ def _run_trtexec(cmd: List[str]) -> bool:
     Run a trtexec command, streaming its output live to the terminal.
     Returns True if the command exited successfully, False otherwise.
     """
-    print("  $", " ".join(cmd))
+    # Intercept 'trtexec' and replace with Jetson absolute path
+    if cmd[0] == 'trtexec':
+        cmd[0] = '/usr/src/tensorrt/bin/trtexec'
+
+    print(" $", " ".join(cmd))
     result = subprocess.run(cmd)
     return result.returncode == 0
-
 
 def build_fp16_engine(onnx_path: Path, output_path: Path) -> bool:
     """
