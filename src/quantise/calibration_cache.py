@@ -101,108 +101,123 @@ def load_calibration_data(data_dir: Path) -> np.ndarray:
 
 
 # TENSOR CALIBRATOR ---------------------------------------------------------
+# QVCalibrator must inherit from trt.IInt8EntropyCalibrator2 so TensorRT
+# accepts it as a valid calibrator.  Because TensorRT is imported lazily
+# (it only exists on the Jetson), we build the class at runtime via a
+# factory function once the trt module is in hand.
 
-class QVCalibrator:
+def _make_calibrator_class(trt):
     """
-    Feeds real Q-V data to TensorRT's INT8 entropy calibrator.
-
-    TensorRT calls get_batch() repeatedly during the engine build to collect
-    activation statistics.  Once it has seen enough data it calls
-    write_calibration_cache() to persist the computed INT8 scale factors.
-    On subsequent builds read_calibration_cache() returns the saved file so
-    calibration can be skipped entirely.
-
-    This class follows the IInt8EntropyCalibrator2 interface, which uses
-    entropy minimisation to pick scale factors — generally the most accurate
-    option for networks that process continuous sensor data like Q-V curves.
+    Return a QVCalibrator class that properly inherits from
+    trt.IInt8EntropyCalibrator2.  Called once inside generate_cache()
+    after TensorRT has been successfully imported.
     """
 
-    def __init__(
-        self,
-        data: np.ndarray,
-        cache_path: Path,
-        batch_size: int,
-        num_batches: Optional[int],
-    ):
-        # pycuda is only imported here because it requires an active CUDA
-        # context, which may not exist on the machine running data prep.
-        import pycuda.driver as cuda
-
-        self._cuda = cuda
-        self.cache_path = cache_path
-        self.batch_size = batch_size
-        self.data = data
-        self.current_batch = 0
-
-        # If the caller didn't specify a limit, use every sample exactly once.
-        self.num_batches = num_batches if num_batches else (len(data) // batch_size)
-
-        # Pinned (page-locked) host memory allows the GPU to DMA the data
-        # directly without an extra copy — faster than regular numpy arrays.
-        self._host_buffer = cuda.pagelocked_empty(
-            (batch_size, data.shape[1]), dtype=np.float32
-        )
-        # Matching device-side allocation that TensorRT reads from.
-        self._device_buffer = cuda.mem_alloc(self._host_buffer.nbytes)
-
-    
-    # Tensor Calibrating Inferface
-    # |
-    def get_batch_size(self) -> int:
-        """Tell TensorRT how many samples are in each batch we provide."""
-        return self.batch_size
-
-    def get_batch(self, names: List[str]):
+    class QVCalibrator(trt.IInt8EntropyCalibrator2):
         """
-        Return the next batch of calibration data as a GPU pointer.
+        Feeds real Q-V data to TensorRT's INT8 entropy calibrator.
 
-        TensorRT calls this in a loop until we return None, signalling that
-        all calibration data has been consumed.  'names' contains the input
-        tensor names from the ONNX graph — we ignore them because we only
-        have a single input.
+        TensorRT calls get_batch() repeatedly during the engine build to collect
+        activation statistics.  Once it has seen enough data it calls
+        write_calibration_cache() to persist the computed INT8 scale factors.
+        On subsequent builds read_calibration_cache() returns the saved file so
+        calibration can be skipped entirely.
+
+        IInt8EntropyCalibrator2 uses entropy minimisation to choose scale
+        factors — generally the most accurate option for continuous sensor data
+        like Q-V curves.
         """
-        start = self.current_batch * self.batch_size
 
-        # Signal end-of-calibration when we've served all requested batches
-        # or run out of data (whichever comes first).
-        if self.current_batch >= self.num_batches or start >= len(self.data):
-            return None
+        def __init__(
+            self,
+            data: np.ndarray,
+            cache_path: Path,
+            batch_size: int,
+            num_batches: Optional[int],
+        ):
+            # Must call the TensorRT base class init before anything else.
+            trt.IInt8EntropyCalibrator2.__init__(self)
 
-        end = min(start + self.batch_size, len(self.data))
-        batch = self.data[start:end]
+            # pycuda is only imported here because it requires an active CUDA
+            # context, which may not exist on the machine running data prep.
+            import pycuda.driver as cuda
 
-        # If the very last slice is smaller than batch_size, pad it by
-        # repeating the first few rows.  TensorRT requires a fixed size.
-        if len(batch) < self.batch_size:
-            shortfall = self.batch_size - len(batch)
-            batch = np.vstack([batch, batch[:shortfall]])
+            self._cuda = cuda
+            self.cache_path = cache_path
+            self.batch_size = batch_size
+            self.data = data
+            self.current_batch = 0
 
-        # Copy from CPU → pinned host buffer → GPU device buffer
-        np.copyto(self._host_buffer, batch)
-        self._cuda.memcpy_htod(self._device_buffer, self._host_buffer)
-        self.current_batch += 1
+            # If the caller didn't specify a limit, use every sample exactly once.
+            self.num_batches = num_batches if num_batches else (len(data) // batch_size)
 
-        # Return a list of device pointers, one per model input
-        return [self._device_buffer]
+            # Pinned (page-locked) host memory allows the GPU to DMA the data
+            # directly without an extra copy — faster than regular numpy arrays.
+            self._host_buffer = cuda.pagelocked_empty(
+                (batch_size, data.shape[1]), dtype=np.float32
+            )
+            # Matching device-side allocation that TensorRT reads from.
+            self._device_buffer = cuda.mem_alloc(self._host_buffer.nbytes)
 
-    def read_calibration_cache(self):
-        """
-        Return the cached INT8 scales from a previous run, if they exist.
+        # ── TensorRT calibrator interface ─────────────────────────────────
 
-        TensorRT checks this first; if it gets data back it skips re-running
-        calibration entirely, making subsequent engine builds much faster.
-        """
-        if self.cache_path.exists():
-            with open(self.cache_path, "rb") as f:
-                return f.read()
-        return None  # No cache yet — TensorRT will run calibration from scratch
+        def get_batch_size(self) -> int:
+            """Tell TensorRT how many samples are in each batch we provide."""
+            return self.batch_size
 
-    def write_calibration_cache(self, cache: bytes) -> None:
-        """Save the INT8 scale factors TensorRT just computed to disk."""
-        self.cache_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.cache_path, "wb") as f:
-            f.write(cache)
-        print(f"  Calibration cache saved -> {self.cache_path}")
+        def get_batch(self, names: List[str]):
+            """
+            Return the next batch of calibration data as a GPU pointer.
+
+            TensorRT calls this in a loop until we return None, signalling that
+            all calibration data has been consumed.  'names' contains the input
+            tensor names from the ONNX graph — we ignore them because we only
+            have a single input.
+            """
+            start = self.current_batch * self.batch_size
+
+            # Signal end-of-calibration when we've served all requested batches
+            # or run out of data (whichever comes first).
+            if self.current_batch >= self.num_batches or start >= len(self.data):
+                return None
+
+            end = min(start + self.batch_size, len(self.data))
+            batch = self.data[start:end]
+
+            # If the very last slice is smaller than batch_size, pad it by
+            # repeating the first few rows.  TensorRT requires a fixed size.
+            if len(batch) < self.batch_size:
+                shortfall = self.batch_size - len(batch)
+                batch = np.vstack([batch, batch[:shortfall]])
+
+            # Copy from CPU -> pinned host buffer -> GPU device buffer
+            np.copyto(self._host_buffer, batch)
+            self._cuda.memcpy_htod(self._device_buffer, self._host_buffer)
+            self.current_batch += 1
+
+            # Return a list of device pointers, one per model input
+            return [self._device_buffer]
+
+        def read_calibration_cache(self):
+            """
+            Return the cached INT8 scales from a previous run, if they exist.
+
+            TensorRT checks this first; if it gets data back it skips re-running
+            calibration entirely, making subsequent engine builds much faster.
+            """
+            if self.cache_path.exists():
+                with open(self.cache_path, "rb") as f:
+                    return f.read()
+            return None  # No cache yet — TensorRT will run calibration from scratch
+
+        def write_calibration_cache(self, cache: bytes) -> None:
+            """Save the INT8 scale factors TensorRT just computed to disk."""
+            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.cache_path, "wb") as f:
+                f.write(cache)
+            print(f"  Calibration cache saved -> {self.cache_path}")
+
+    return QVCalibrator
 
 
 
@@ -232,6 +247,8 @@ def generate_cache(
     trt = _import_tensorrt()
     logger = trt.Logger(trt.Logger.WARNING)
 
+    # Build the calibrator class now that trt is available, then instantiate it.
+    QVCalibrator = _make_calibrator_class(trt)
     calibrator = QVCalibrator(data, cache_path, batch_size, num_batches)
 
     print(
