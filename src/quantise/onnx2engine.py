@@ -32,7 +32,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 
 # ==========================================================================
@@ -78,7 +78,7 @@ BASE_FLAGS = [
 # ==========================================================================
 
 # Engine builders ----------------------------------------------------------
-def _run_trtexec(cmd: list[str]) -> bool:
+def _run_trtexec(cmd: List[str]) -> bool:
     """
     Run a trtexec command, streaming its output live to the terminal.
     Returns True if the command exited successfully, False otherwise.
@@ -164,7 +164,7 @@ def main() -> None:
 
     print(f"Found {len(onnx_files)} model(s) in {models_dir}\n")
 
-    results: dict[str, dict[str, bool]] = {}
+    results: Dict[str, Dict[str, bool]] = {}
 
     for onnx_path in onnx_files:
         model_name = onnx_path.stem

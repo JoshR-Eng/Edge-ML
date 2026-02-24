@@ -57,7 +57,7 @@ fi
 
 # Run Quantisation Scripts --------------------------------------------------
 echo "============================================================"
-echo "  Quantisation pipeline  →  models/$FOLDER"
+echo "  Quantisation pipeline  =>  models/$FOLDER"
 echo "============================================================"
 echo
 

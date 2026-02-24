@@ -27,7 +27,7 @@ USAGE:
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import torch
@@ -152,7 +152,7 @@ class QVCalibrator:
         """Tell TensorRT how many samples are in each batch we provide."""
         return self.batch_size
 
-    def get_batch(self, names: list[str]):
+    def get_batch(self, names: List[str]):
         """
         Return the next batch of calibration data as a GPU pointer.
 
@@ -326,7 +326,7 @@ def main() -> None:
     # 0 on the CLI means "use everything"; None is the internal sentinel for that.
     num_batches = args.num_batches if args.num_batches > 0 else None
 
-    results: dict[str, bool] = {}
+    results: Dict[str, bool] = {}
 
     for onnx_path in onnx_files:
         model_name = onnx_path.stem
