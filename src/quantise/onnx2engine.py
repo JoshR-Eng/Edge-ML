@@ -32,6 +32,7 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
+from typing import Optional
 
 
 # ==========================================================================
@@ -103,7 +104,7 @@ def build_fp16_engine(onnx_path: Path, output_path: Path) -> bool:
     ])
 
 
-def build_int8_engine(onnx_path: Path, output_path: Path, calib_cache: Path | None) -> bool:
+def build_int8_engine(onnx_path: Path, output_path: Path, calib_cache: Optional[Path]) -> bool:
     """
     Compile an INT8 TensorRT engine from an ONNX model.
 
