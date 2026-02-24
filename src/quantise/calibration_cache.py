@@ -27,6 +27,7 @@ USAGE:
 import argparse
 import sys
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import torch
@@ -121,7 +122,7 @@ class QVCalibrator:
         data: np.ndarray,
         cache_path: Path,
         batch_size: int,
-        num_batches: int | None,
+        num_batches: Optional[int],
     ):
         # pycuda is only imported here because it requires an active CUDA
         # context, which may not exist on the machine running data prep.
@@ -201,7 +202,7 @@ class QVCalibrator:
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.cache_path, "wb") as f:
             f.write(cache)
-        print(f"  Calibration cache saved → {self.cache_path}")
+        print(f"  Calibration cache saved -> {self.cache_path}")
 
 
 
@@ -213,7 +214,7 @@ def generate_cache(
     cache_path: Path,
     data: np.ndarray,
     batch_size: int,
-    num_batches: int | None,
+    num_batches: Optional[int],
 ) -> bool:
     """
     Run TensorRT calibration for a single ONNX model and write the .cache file.
@@ -235,22 +236,21 @@ def generate_cache(
 
     print(
         f"  Calibrating {onnx_path.name} "
-        f"({calibrator.num_batches} batches × {batch_size} samples = "
+        f"({calibrator.num_batches} batches * {batch_size} samples = "
         f"{calibrator.num_batches * batch_size:,} total) …"
     )
 
     # Build the network inside a set of context managers so TensorRT cleans
     # up its internal resources (builders, parsers, configs) automatically.
-    with (
-        trt.Builder(logger) as builder,
-        builder.create_network(
-            # EXPLICIT_BATCH mode is required for ONNX models; it lets
-            # TensorRT reason about the batch dimension at build time.
-            1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
-        ) as network,
-        trt.OnnxParser(network, logger) as parser,
-        builder.create_builder_config() as config,
-    ):
+    # Note: backslash form used here for Python 3.8/3.9 compatibility (Jetson JetPack).
+    with trt.Builder(logger) as builder, \
+         builder.create_network(
+             # EXPLICIT_BATCH mode is required for ONNX models; it lets
+             # TensorRT reason about the batch dimension at build time.
+             1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+         ) as network, \
+         trt.OnnxParser(network, logger) as parser, \
+         builder.create_builder_config() as config:
         # ── Step 1: Parse the ONNX graph ──────────────────────────────────
         with open(onnx_path, "rb") as f:
             if not parser.parse(f.read()):
@@ -344,7 +344,7 @@ def main() -> None:
             onnx_path, cache_path, calibration_data, args.batch_size, num_batches
         )
         results[model_name] = success
-        print(f"  {'✓ Cache written' if success else '✗ FAILED'}\n")
+        print(f"  {'OK Cache written' if success else 'X FAILED'}\n")
 
 
 
