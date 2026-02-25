@@ -31,6 +31,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import torch
+import yaml
 
 
 
@@ -39,17 +40,13 @@ import torch
 # ==========================================================================
 # Which sub-folder inside ./models/ to process (e.g. "v1", "v2")
 FOLDER = "v1"
-
-
-DATA_DIR = "data/tensor_qv" # Where to find the calibration tensors
-
-# How many Q-V samples to feed per calibration step.
-# Larger batches give TensorRT more signal per step but use more GPU memory.
+DATA_DIR = "data/tensor_qv"
 BATCH_SIZE = 32
-
-# How many batches to run in total (BATCH_SIZE × NUM_BATCHES = total samples seen).
-# 64 batches × 32 samples = 2 048 samples, which is enough for stable INT8 scales.
 NUM_BATCHES = 64
+
+# Which split(s) to use for calibration data.
+# can be "train" or "val"
+CELL_SPLIT = "train"
 
 
 # ==========================================================================
@@ -73,29 +70,88 @@ def _import_tensorrt():
 
 # DATA LOADING --------------------------------------------------------------
 
-def load_calibration_data(data_dir: Path) -> np.ndarray:
+def load_splits(repo_root: Path) -> Dict[str, List[str]]:
     """
-    Load every .pt file in data_dir and stack the "X" tensors into one array.
+    Load the cell splits from configs.yaml.
 
-    Each file holds one battery cycle's worth of Q-V measurements.
-    Shape of the returned array: (total_samples, 120)  — 120 voltage points.
-    The rows are shuffled so that every calibration batch is a random mix of
-    cycles rather than a block of consecutive ones.
+    Returns a dict with keys 'train', 'val', 'test', each mapping to a list
+    of cell ID strings (e.g. ['01', '05', ...]).
     """
-    pt_files = sorted(data_dir.glob("*.pt"))
-    if not pt_files:
+    config_path = repo_root / "configs.yaml"
+    if not config_path.exists():
+        raise FileNotFoundError(f"configs.yaml not found at {config_path}")
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    return config["splits"]
+
+
+def resolve_cell_ids(splits: Dict[str, List[str]], split_arg: str) -> List[str]:
+    """
+    Expand a split argument like 'train', 'val', or 'train+val' into a flat
+    list of cell IDs, and reject any request that includes test cells.
+
+    The '+' syntax lets you combine splits, e.g. '--split train+val' uses
+    both training and validation cells for calibration.
+    """
+    requested = [s.strip() for s in split_arg.split("+")]
+
+    if "test" in requested:
+        print(
+            "ERROR: test cells must not be used for calibration — "
+            "this would leak evaluation data into the quantisation process.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    cell_ids = []
+    for name in requested:
+        if name not in splits:
+            print(f"ERROR: unknown split '{name}'. Choose from: {list(splits.keys())}", file=sys.stderr)
+            sys.exit(1)
+        cell_ids.extend(splits[name])
+
+    return cell_ids
+
+
+def load_calibration_data(data_dir: Path, cell_ids: List[str]) -> np.ndarray:
+    """
+    Load .pt files for the given cell IDs and stack their X tensors into one array.
+
+    Files are named like '01_Rd_3C.pt' — we match by the numeric prefix so the
+    protocol suffix doesn't matter.  Only cells in cell_ids are loaded, ensuring
+    test cells are never used for calibration.
+
+    Shape of the returned array: (total_samples, 120) — 120 voltage points per cycle.
+    Rows are shuffled so each calibration batch is a random mix of cells and cycles.
+    """
+    all_files = sorted(data_dir.glob("*.pt"))
+    if not all_files:
         raise FileNotFoundError(f"No .pt files found in {data_dir}")
 
+    # Match each requested cell ID to its file (e.g. '01' -> '01_Rd_3C.pt')
+    matched = []
+    for cell_id in cell_ids:
+        match = next((f for f in all_files if f.stem.startswith(f"{cell_id}_")), None)
+        if match:
+            matched.append(match)
+        else:
+            print(f"  Warning: no file found for cell {cell_id}, skipping.")
+
+    if not matched:
+        raise RuntimeError(f"No files matched any of the requested cell IDs: {cell_ids}")
+
     arrays = []
-    for pt_file in pt_files:
+    for pt_file in matched:
         sample = torch.load(pt_file, map_location="cpu", weights_only=True)
         # Each file's "X" key is shape (num_cycles, 120)
         arrays.append(sample["X"].numpy().astype(np.float32))
 
     all_data = np.concatenate(arrays, axis=0)   # (total_samples, 120)
-    np.random.shuffle(all_data)                 # mix cycles from different files
+    np.random.shuffle(all_data)                 # mix cycles from different cells
 
-    print(f"  Loaded {all_data.shape[0]:,} samples from {len(pt_files)} files")
+    print(f"  Loaded {all_data.shape[0]:,} samples from {len(matched)} cells")
     return all_data
 
 
@@ -317,6 +373,12 @@ def main() -> None:
         "--num-batches", default=NUM_BATCHES, type=int,
         help="Number of calibration batches; 0 = use all available data  (default: %(default)s)",
     )
+    arg_parser.add_argument(
+        "--split", default=CELL_SPLIT,
+        help="Which cell split(s) to use for calibration. "
+             "Use '+' to combine, e.g. 'train+val'. "
+             "Test cells are always blocked.  (default: %(default)s)",
+    )
     args = arg_parser.parse_args()
 
     # Resolve paths relative to the repository root so the script works
@@ -334,10 +396,16 @@ def main() -> None:
         print(f"ERROR: no .onnx files found under {models_dir}", file=sys.stderr)
         sys.exit(1)
 
+    # Load cell splits from configs.yaml and resolve the requested split(s).
+    # This ensures test cells are never used for calibration.
+    splits   = load_splits(repo_root)
+    cell_ids = resolve_cell_ids(splits, args.split)
+    print(f"Using '{args.split}' split  ({len(cell_ids)} cells)")
+
     # Load all calibration tensors upfront — every model shares the same
     # Q-V input domain, so we only need to do this expensive step once.
-    print(f"Loading calibration data from {data_dir} …")
-    calibration_data = load_calibration_data(data_dir)
+    print(f"Loading calibration data from {data_dir} ...")
+    calibration_data = load_calibration_data(data_dir, cell_ids)
     print()
 
     # 0 on the CLI means "use everything"; None is the internal sentinel for that.
@@ -366,12 +434,12 @@ def main() -> None:
 
 
     # Final summary: 
-    print(f"{'═' * 60}")
+    print(f"{'=' * 60}")
     print("  Summary")
-    print(f"{'─' * 60}")
+    print(f"{'-' * 60}")
     for model_name, success in results.items():
         print(f"  {model_name:<20}  {'OK' if success else 'X'}")
-    print(f"{'═' * 60}")
+    print(f"{'=' * 60}")
 
     sys.exit(0 if all(results.values()) else 1)
 
