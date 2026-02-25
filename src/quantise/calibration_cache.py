@@ -1,30 +1,10 @@
 #!/usr/bin/env python3
 """
-DESCRIPTION:
-Generate INT8 calibration caches for TensorRT from real Q-V battery data.
+Generate INT8 calibration caches for each model in models/<folder>/*.onnx.
+Called by quantise.sh — not intended to be run directly.
 
-
-OUTPUT:
-    models/<FOLDER>/<ModelName>/<ModelName>.cache
-
-
-REQUIREMENTS:  (available on Jetson / any TRT host)
-    - tensorrt  
-    - pycuda  
-    - torch  
-    - numpy
-
-
-USAGE:
-    python calibration_cache.py [--folder FOLDER] [--data DATA_DIR]
-                                [--batch-size N]   [--num-batches N]
+Output: models/<folder>/<ModelName>/<ModelName>.cache
 """
-
-
-# ==========================================================================
-#                                IMPORTS                      
-# ==========================================================================
-import argparse
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -34,315 +14,184 @@ import torch
 import yaml
 
 
+#  Config ----------------------------------------------------------------------
 
-# ==========================================================================
-#                                 CONFIG                     
-# ==========================================================================
-# Which sub-folder inside ./models/ to process (e.g. "v1", "v2")
-FOLDER = "v1"
-DATA_DIR = "data/tensor_qv"
-BATCH_SIZE = 32
-NUM_BATCHES = 64
-
-# Which split(s) to use for calibration data.
-# can be "train" or "val"
-CELL_SPLIT = "train"
+DATA_DIR    = "data/tensor_qv"
+BATCH_SIZE  = 32   # Q-V samples fed to TensorRT per calibration step
+NUM_BATCHES = 64   # 64 × 32 = 2,048 samples total — enough for stable INT8 scales
 
 
-# ==========================================================================
-#                                   MAIN                       
-# ==========================================================================
+# Data Loading -----------------------------------------------------------------
 
-def _import_tensorrt():
-    """Import TensorRT and exit with a clear message if it isn't installed."""
-    try:
-        import tensorrt as trt
-        return trt
-    except ImportError:
-        print(
-            "ERROR: tensorrt Python package not found.\n"
-            "       Install it on the Jetson or TensorRT host first.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-
-
-# DATA LOADING --------------------------------------------------------------
-
-def load_splits(repo_root: Path) -> Dict[str, List[str]]:
+def load_train_cells(repo_root: Path) -> List[str]:
     """
-    Load the cell splits from configs.yaml.
+    Return the training cell IDs from configs.yaml.
 
-    Returns a dict with keys 'train', 'val', 'test', each mapping to a list
-    of cell ID strings (e.g. ['01', '05', ...]).
+    Only training cells are used for calibration — using validation or test
+    cells would leak evaluation data into the quantisation process.
     """
-    config_path = repo_root / "configs.yaml"
-    if not config_path.exists():
-        raise FileNotFoundError(f"configs.yaml not found at {config_path}")
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-
-    return config["splits"]
-
-
-def resolve_cell_ids(splits: Dict[str, List[str]], split_arg: str) -> List[str]:
-    """
-    Expand a split argument like 'train', 'val', or 'train+val' into a flat
-    list of cell IDs, and reject any request that includes test cells.
-
-    The '+' syntax lets you combine splits, e.g. '--split train+val' uses
-    both training and validation cells for calibration.
-    """
-    requested = [s.strip() for s in split_arg.split("+")]
-
-    if "test" in requested:
-        print(
-            "ERROR: test cells must not be used for calibration — "
-            "this would leak evaluation data into the quantisation process.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    cell_ids = []
-    for name in requested:
-        if name not in splits:
-            print(f"ERROR: unknown split '{name}'. Choose from: {list(splits.keys())}", file=sys.stderr)
-            sys.exit(1)
-        cell_ids.extend(splits[name])
-
-    return cell_ids
+    with open(repo_root / "configs.yaml") as f:
+        splits = yaml.safe_load(f)["splits"]
+    return splits["train"]
 
 
 def load_calibration_data(data_dir: Path, cell_ids: List[str]) -> np.ndarray:
     """
     Load .pt files for the given cell IDs and stack their X tensors into one array.
 
-    Files are named like '01_Rd_3C.pt' — we match by the numeric prefix so the
-    protocol suffix doesn't matter.  Only cells in cell_ids are loaded, ensuring
-    test cells are never used for calibration.
+    Files are named like '01_Rd_3C.pt' — matched by the numeric prefix so the
+    protocol suffix doesn't matter.
 
-    Shape of the returned array: (total_samples, 120) — 120 voltage points per cycle.
-    Rows are shuffled so each calibration batch is a random mix of cells and cycles.
+    Returns shape (total_samples, 120), shuffled so each calibration batch
+    is a random mix of cells and cycles rather than a block of one cell.
     """
     all_files = sorted(data_dir.glob("*.pt"))
-    if not all_files:
-        raise FileNotFoundError(f"No .pt files found in {data_dir}")
 
-    # Match each requested cell ID to its file (e.g. '01' -> '01_Rd_3C.pt')
     matched = []
     for cell_id in cell_ids:
         match = next((f for f in all_files if f.stem.startswith(f"{cell_id}_")), None)
         if match:
             matched.append(match)
-        else:
-            print(f"  Warning: no file found for cell {cell_id}, skipping.")
 
     if not matched:
-        raise RuntimeError(f"No files matched any of the requested cell IDs: {cell_ids}")
+        raise RuntimeError(f"No .pt files matched cell IDs in {data_dir}")
 
     arrays = []
     for pt_file in matched:
         sample = torch.load(pt_file, map_location="cpu", weights_only=True)
-        # Each file's "X" key is shape (num_cycles, 120)
-        arrays.append(sample["X"].numpy().astype(np.float32))
+        arrays.append(sample["X"].numpy().astype(np.float32))  # (num_cycles, 120)
 
-    all_data = np.concatenate(arrays, axis=0)   # (total_samples, 120)
-    np.random.shuffle(all_data)                 # mix cycles from different cells
+    data = np.concatenate(arrays, axis=0)
+    np.random.shuffle(data)
 
-    print(f"  Loaded {all_data.shape[0]:,} samples from {len(matched)} cells")
-    return all_data
-
+    print(f"  Loaded {data.shape[0]:,} samples from {len(matched)} cells")
+    return data
 
 
-# TENSOR CALIBRATOR ---------------------------------------------------------
-# QVCalibrator must inherit from trt.IInt8EntropyCalibrator2 so TensorRT
-# accepts it as a valid calibrator.  Because TensorRT is imported lazily
-# (it only exists on the Jetson), we build the class at runtime via a
-# factory function once the trt module is in hand.
+# TensorRT Calibrator Class --------------------------------------------------
+
+def _import_tensorrt():
+    try:
+        import tensorrt as trt
+        return trt
+    except ImportError:
+        print("ERROR: tensorrt not found. Install it on the Jetson first.", file=sys.stderr)
+        sys.exit(1)
+
 
 def _make_calibrator_class(trt):
     """
-    Return a QVCalibrator class that properly inherits from
-    trt.IInt8EntropyCalibrator2.  Called once inside generate_cache()
-    after TensorRT has been successfully imported.
+    Build QVCalibrator as a runtime subclass of trt.IInt8EntropyCalibrator2.
+
+    The class must genuinely inherit from TensorRT's base — duck typing isn't
+    accepted. We can't do this at module level because trt is only available
+    on the Jetson, so we build the class here after importing trt.
     """
 
     class QVCalibrator(trt.IInt8EntropyCalibrator2):
-        """
-        Feeds real Q-V data to TensorRT's INT8 entropy calibrator.
 
-        TensorRT calls get_batch() repeatedly during the engine build to collect
-        activation statistics.  Once it has seen enough data it calls
-        write_calibration_cache() to persist the computed INT8 scale factors.
-        On subsequent builds read_calibration_cache() returns the saved file so
-        calibration can be skipped entirely.
-
-        IInt8EntropyCalibrator2 uses entropy minimisation to choose scale
-        factors — generally the most accurate option for continuous sensor data
-        like Q-V curves.
-        """
-
-        def __init__(
-            self,
-            data: np.ndarray,
-            cache_path: Path,
-            batch_size: int,
-            num_batches: Optional[int],
-        ):
-            # Must call the TensorRT base class init before anything else.
+        def __init__(self, data: np.ndarray, cache_path: Path,
+                     batch_size: int, num_batches: Optional[int]):
             trt.IInt8EntropyCalibrator2.__init__(self)
 
-            # pycuda is only imported here because it requires an active CUDA
-            # context, which may not exist on the machine running data prep.
+            # pycuda requires an active CUDA context — imported here, not at
+            # module level, so the script can load on non-CUDA machines.
             import pycuda.driver as cuda
 
-            self._cuda = cuda
-            self.cache_path = cache_path
-            self.batch_size = batch_size
-            self.data = data
+            self._cuda        = cuda
+            self.cache_path   = cache_path
+            self.batch_size   = batch_size
+            self.data         = data
             self.current_batch = 0
+            self.num_batches  = num_batches or (len(data) // batch_size)
 
-            # If the caller didn't specify a limit, use every sample exactly once.
-            self.num_batches = num_batches if num_batches else (len(data) // batch_size)
-
-            # Pinned (page-locked) host memory allows the GPU to DMA the data
-            # directly without an extra copy — faster than regular numpy arrays.
-            self._host_buffer = cuda.pagelocked_empty(
-                (batch_size, data.shape[1]), dtype=np.float32
-            )
-            # Matching device-side allocation that TensorRT reads from.
-            self._device_buffer = cuda.mem_alloc(self._host_buffer.nbytes)
-
-        # ── TensorRT calibrator interface ─────────────────────────────────
+            # Page-locked host memory lets the GPU DMA data directly, avoiding
+            # an extra copy versus a regular numpy array.
+            self._host_buf = cuda.pagelocked_empty((batch_size, data.shape[1]),
+                                                   dtype=np.float32)
+            self._dev_buf  = cuda.mem_alloc(self._host_buf.nbytes)
 
         def get_batch_size(self) -> int:
-            """Tell TensorRT how many samples are in each batch we provide."""
             return self.batch_size
 
         def get_batch(self, names: List[str]):
-            """
-            Return the next batch of calibration data as a GPU pointer.
-
-            TensorRT calls this in a loop until we return None, signalling that
-            all calibration data has been consumed.  'names' contains the input
-            tensor names from the ONNX graph — we ignore them because we only
-            have a single input.
-            """
+            # TensorRT calls this in a loop; returning None signals end of data.
             start = self.current_batch * self.batch_size
-
-            # Signal end-of-calibration when we've served all requested batches
-            # or run out of data (whichever comes first).
             if self.current_batch >= self.num_batches or start >= len(self.data):
                 return None
 
-            end = min(start + self.batch_size, len(self.data))
+            end   = min(start + self.batch_size, len(self.data))
             batch = self.data[start:end]
 
-            # If the very last slice is smaller than batch_size, pad it by
-            # repeating the first few rows.  TensorRT requires a fixed size.
+            # Pad the last (possibly short) batch by repeating rows.
             if len(batch) < self.batch_size:
                 shortfall = self.batch_size - len(batch)
                 batch = np.vstack([batch, batch[:shortfall]])
 
-            # Copy from CPU -> pinned host buffer -> GPU device buffer
-            np.copyto(self._host_buffer, batch)
-            self._cuda.memcpy_htod(self._device_buffer, self._host_buffer)
+            np.copyto(self._host_buf, batch)
+            self._cuda.memcpy_htod(self._dev_buf, self._host_buf)
             self.current_batch += 1
-
-            # Return a list of device pointers, one per model input
-            return [self._device_buffer]
+            return [self._dev_buf]
 
         def read_calibration_cache(self):
-            """
-            Return the cached INT8 scales from a previous run, if they exist.
-
-            TensorRT checks this first; if it gets data back it skips re-running
-            calibration entirely, making subsequent engine builds much faster.
-            """
+            # If a cache already exists TensorRT skips re-calibrating.
             if self.cache_path.exists():
                 with open(self.cache_path, "rb") as f:
                     return f.read()
-            return None  # No cache yet — TensorRT will run calibration from scratch
+            return None
 
         def write_calibration_cache(self, cache: bytes) -> None:
-            """Save the INT8 scale factors TensorRT just computed to disk."""
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.cache_path, "wb") as f:
                 f.write(cache)
-            print(f"  Calibration cache saved -> {self.cache_path}")
+            print(f"  Cache saved -> {self.cache_path.name}")
 
     return QVCalibrator
 
 
+# Cache Generation ----------------------------------------------------------------
 
-
-# CACHE GENERATION ---------------------------------------------------------
-
-def generate_cache(
-    onnx_path: Path,
-    cache_path: Path,
-    data: np.ndarray,
-    batch_size: int,
-    num_batches: Optional[int],
-) -> bool:
+def generate_cache(onnx_path: Path, cache_path: Path,
+                   data: np.ndarray, batch_size: int,
+                   num_batches: Optional[int]) -> bool:
     """
-    Run TensorRT calibration for a single ONNX model and write the .cache file.
+    Run TensorRT INT8 calibration for one ONNX model and write the .cache file.
 
-    We build a full TensorRT engine here, but only to drive the calibration
-    loop — the engine itself is thrown away.  The valuable output is the
-    .cache file written by QVCalibrator.write_calibration_cache(), which
-    onnx2engine.py will pick up when building the final optimised engine.
-
-    Returns True on success, False if the ONNX couldn't be parsed or the
-    engine build failed.
+    A full TRT engine is built here only to drive the calibration loop — the
+    engine itself is discarded. The .cache file is what onnx2engine.py uses.
     """
-    import pycuda.autoinit  # noqa: F401  — initialises the CUDA context once
+    import pycuda.autoinit  # noqa: F401 — initialises the CUDA context
 
-    trt = _import_tensorrt()
-    logger = trt.Logger(trt.Logger.WARNING)
+    trt        = _import_tensorrt()
+    logger     = trt.Logger(trt.Logger.WARNING)
+    Calibrator = _make_calibrator_class(trt)
+    calibrator = Calibrator(data, cache_path, batch_size, num_batches)
 
-    # Build the calibrator class now that trt is available, then instantiate it.
-    QVCalibrator = _make_calibrator_class(trt)
-    calibrator = QVCalibrator(data, cache_path, batch_size, num_batches)
+    print(f"  Calibrating {onnx_path.name} "
+          f"({calibrator.num_batches} batches x {batch_size} = "
+          f"{calibrator.num_batches * batch_size:,} samples) ...")
 
-    print(
-        f"  Calibrating {onnx_path.name} "
-        f"({calibrator.num_batches} batches * {batch_size} samples = "
-        f"{calibrator.num_batches * batch_size:,} total) …"
-    )
-
-    # Build the network inside a set of context managers so TensorRT cleans
-    # up its internal resources (builders, parsers, configs) automatically.
-    # Note: backslash form used here for Python 3.8/3.9 compatibility (Jetson JetPack).
     with trt.Builder(logger) as builder, \
          builder.create_network(
-             # EXPLICIT_BATCH mode is required for ONNX models; it lets
-             # TensorRT reason about the batch dimension at build time.
              1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
          ) as network, \
          trt.OnnxParser(network, logger) as parser, \
          builder.create_builder_config() as config:
-        # ── Step 1: Parse the ONNX graph ──────────────────────────────────
+
         with open(onnx_path, "rb") as f:
             if not parser.parse(f.read()):
                 for i in range(parser.num_errors):
-                    print(f"  ONNX parse error: {parser.get_error(i)}", file=sys.stderr)
+                    print(f"  ONNX error: {parser.get_error(i)}", file=sys.stderr)
                 return False
 
-        # ── Step 2: Configure INT8 calibration ────────────────────────────
-        # INT8 is the target precision.  FP16 is also enabled as a fallback
-        # for any layers that TensorRT can't run in INT8 (e.g. some activations).
         config.set_flag(trt.BuilderFlag.INT8)
-        config.set_flag(trt.BuilderFlag.FP16)
+        config.set_flag(trt.BuilderFlag.FP16)  # fallback for layers that can't run INT8
         config.int8_calibrator = calibrator
         config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 4096 * (1 << 20))
 
-        # ── Step 3: Build (this triggers the calibration loop) ────────────
         engine = builder.build_serialized_network(network, config)
         if engine is None:
-            print(f"  ERROR: engine build failed for {onnx_path.name}", file=sys.stderr)
+            print(f"  ERROR: build failed for {onnx_path.name}", file=sys.stderr)
             return False
 
     return True
@@ -350,45 +199,20 @@ def generate_cache(
 
 
 
-# ENTRY POINT ----------------------------------------------------------------
+# Script Entry Point ------------------------------------------------------------
 
-def main() -> None:
-    arg_parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    arg_parser.add_argument(
-        "--folder", default=FOLDER,
-        help="Models sub-folder inside ./models/  (default: %(default)s)",
-    )
-    arg_parser.add_argument(
-        "--data", default=DATA_DIR, type=Path,
-        help="Directory of .pt calibration tensors  (default: %(default)s)",
-    )
-    arg_parser.add_argument(
-        "--batch-size", default=BATCH_SIZE, type=int,
-        help="Samples per calibration batch  (default: %(default)s)",
-    )
-    arg_parser.add_argument(
-        "--num-batches", default=NUM_BATCHES, type=int,
-        help="Number of calibration batches; 0 = use all available data  (default: %(default)s)",
-    )
-    arg_parser.add_argument(
-        "--split", default=CELL_SPLIT,
-        help="Which cell split(s) to use for calibration. "
-             "Use '+' to combine, e.g. 'train+val'. "
-             "Test cells are always blocked.  (default: %(default)s)",
-    )
-    args = arg_parser.parse_args()
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python calibration_cache.py <folder>", file=sys.stderr)
+        sys.exit(1)
 
-    # Resolve paths relative to the repository root so the script works
-    # regardless of which directory you launch it from.
-    repo_root  = Path(__file__).resolve().parents[2]
-    models_dir = repo_root / "models" / args.folder
-    data_dir   = repo_root / args.data if not Path(args.data).is_absolute() else Path(args.data)
+    folder    = sys.argv[1]
+    repo_root = Path(__file__).resolve().parents[2]
+    models_dir = repo_root / "models" / folder
+    data_dir   = repo_root / DATA_DIR
 
     if not models_dir.exists():
-        print(f"ERROR: models directory not found: {models_dir}", file=sys.stderr)
+        print(f"ERROR: models/{folder} does not exist", file=sys.stderr)
         sys.exit(1)
 
     onnx_files = sorted(models_dir.glob("*/*.onnx"))
@@ -396,20 +220,11 @@ def main() -> None:
         print(f"ERROR: no .onnx files found under {models_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Load cell splits from configs.yaml and resolve the requested split(s).
-    # This ensures test cells are never used for calibration.
-    splits   = load_splits(repo_root)
-    cell_ids = resolve_cell_ids(splits, args.split)
-    print(f"Using '{args.split}' split  ({len(cell_ids)} cells)")
-
-    # Load all calibration tensors upfront — every model shares the same
-    # Q-V input domain, so we only need to do this expensive step once.
+    cell_ids = load_train_cells(repo_root)
+    print(f"Using train split ({len(cell_ids)} cells)")
     print(f"Loading calibration data from {data_dir} ...")
     calibration_data = load_calibration_data(data_dir, cell_ids)
     print()
-
-    # 0 on the CLI means "use everything"; None is the internal sentinel for that.
-    num_batches = args.num_batches if args.num_batches > 0 else None
 
     results: Dict[str, bool] = {}
 
@@ -418,31 +233,23 @@ def main() -> None:
         cache_path = onnx_path.parent / f"{model_name}.cache"
 
         print(f"{'─' * 60}")
-        print(f"  Model : {model_name}")
+        print(f"  Model: {model_name}")
 
         if cache_path.exists():
-            print(f"  Cache already exists ({cache_path.name}) — skipping.")
+            print(f"  Cache already exists, skipping.")
             results[model_name] = True
             continue
 
-        success = generate_cache(
-            onnx_path, cache_path, calibration_data, args.batch_size, num_batches
+        results[model_name] = generate_cache(
+            onnx_path, cache_path, calibration_data, BATCH_SIZE, NUM_BATCHES
         )
-        results[model_name] = success
-        print(f"  {'OK Cache written' if success else 'X FAILED'}\n")
+        print(f"  {'OK' if results[model_name] else 'FAILED'}\n")
 
-
-
-    # Final summary: 
     print(f"{'=' * 60}")
     print("  Summary")
     print(f"{'-' * 60}")
-    for model_name, success in results.items():
-        print(f"  {model_name:<20}  {'OK' if success else 'X'}")
+    for name, ok in results.items():
+        print(f"  {name:<20}  {'OK' if ok else 'FAILED'}")
     print(f"{'=' * 60}")
 
     sys.exit(0 if all(results.values()) else 1)
-
-
-if __name__ == "__main__":
-    main()

@@ -62,11 +62,11 @@ echo "============================================================"
 echo
 
 echo "--- Step 1/2: Generating INT8 calibration caches -----------"
-python3 "$UTILS_DIR/calibration_cache.py" --folder "$FOLDER"
+python3 "$UTILS_DIR/calibration_cache.py" "$FOLDER"
 echo
 
 echo "--- Step 2/2: Compiling TensorRT engines -------------------"
-python3 "$UTILS_DIR/onnx2engine.py" --folder "$FOLDER"
+python3 "$UTILS_DIR/onnx2engine.py" "$FOLDER"
 echo
 
 echo "============================================================"
