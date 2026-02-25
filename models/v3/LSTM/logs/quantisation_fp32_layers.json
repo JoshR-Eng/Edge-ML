@@ -1,0 +1,5 @@
+{"Layers": ["{ForeignNode[onnx::LSTM_209.../Squeeze]}"
+],
+"Bindings": ["input"
+,"capacity"
+]}

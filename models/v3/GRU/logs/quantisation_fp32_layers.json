@@ -1,0 +1,5 @@
+{"Layers": ["{ForeignNode[(Unnamed Layer* 41) [Constant].../Squeeze]}"
+],
+"Bindings": ["input"
+,"capacity"
+]}
