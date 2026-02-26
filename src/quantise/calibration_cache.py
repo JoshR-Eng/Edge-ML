@@ -7,7 +7,7 @@ Output: models/<folder>/<ModelName>/<ModelName>.cache
 """
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 import torch
@@ -16,9 +16,10 @@ import yaml
 
 #  Config ----------------------------------------------------------------------
 
-DATA_DIR    = "data/tensor_qv"
-BATCH_SIZE  = 32   # Q-V samples fed to TensorRT per calibration step
-NUM_BATCHES = 64   # 64 × 32 = 2,048 samples total — enough for stable INT8 scales
+DATA_DIR      = "data/tensor_qv"
+CALIB_SAMPLES = 2048  # total Q-V samples to use for INT8 calibration
+              # calls = ceil(CALIB_SAMPLES / batch_size), so bs1 and bs32
+              # both calibrate on the same number of samples
 
 
 # Data Loading -----------------------------------------------------------------
@@ -152,24 +153,24 @@ def _make_calibrator_class(trt):
 # Cache Generation ----------------------------------------------------------------
 
 def generate_cache(onnx_path: Path, cache_path: Path,
-                   data: np.ndarray, batch_size: int,
-                   num_batches: Optional[int]) -> bool:
+                   data: np.ndarray,
+                   calib_samples: int) -> bool:
     """
     Run TensorRT INT8 calibration for one ONNX model and write the .cache file.
 
-    A full TRT engine is built here only to drive the calibration loop — the
-    engine itself is discarded. The .cache file is what onnx2engine.py uses.
+    The calibration batch size is read directly from the ONNX input shape so
+    it always matches the network — bs1 models get batch_size=1, bs32 models
+    get batch_size=32.  The number of calibration calls is computed from
+    calib_samples so both scenarios use the same total number of samples.
+
+    A full TRT engine is built here only to drive the calibration loop; the
+    engine itself is discarded.
     """
     import pycuda.autoinit  # noqa: F401 — initialises the CUDA context
 
     trt        = _import_tensorrt()
     logger     = trt.Logger(trt.Logger.WARNING)
     Calibrator = _make_calibrator_class(trt)
-    calibrator = Calibrator(data, cache_path, batch_size, num_batches)
-
-    print(f"  Calibrating {onnx_path.name} "
-          f"({calibrator.num_batches} batches x {batch_size} = "
-          f"{calibrator.num_batches * batch_size:,} samples) ...")
 
     with trt.Builder(logger) as builder, \
          builder.create_network(
@@ -183,6 +184,18 @@ def generate_cache(onnx_path: Path, cache_path: Path,
                 for i in range(parser.num_errors):
                     print(f"  ONNX error: {parser.get_error(i)}", file=sys.stderr)
                 return False
+
+        # Read the batch dimension from the parsed network so the calibrator
+        # always feeds the right number of samples per step:
+        #   bs1  → batch_size=1,  num_calls=2048 → 2,048 samples total
+        #   bs32 → batch_size=32, num_calls=64   → 2,048 samples total
+        batch_size = network.get_input(0).shape[0]
+        num_calls  = (calib_samples + batch_size - 1) // batch_size
+        calibrator = Calibrator(data, cache_path, batch_size, num_calls)
+
+        print(f"  Calibrating {onnx_path.name} "
+              f"({num_calls} calls × {batch_size} = "
+              f"{num_calls * batch_size:,} samples) ...")
 
         config.set_flag(trt.BuilderFlag.INT8)
         config.set_flag(trt.BuilderFlag.FP16)  # fallback for layers that can't run INT8
@@ -241,7 +254,7 @@ if __name__ == "__main__":
             continue
 
         results[model_name] = generate_cache(
-            onnx_path, cache_path, calibration_data, BATCH_SIZE, NUM_BATCHES
+            onnx_path, cache_path, calibration_data, CALIB_SAMPLES
         )
         print(f"  {'OK' if results[model_name] else 'FAILED'}\n")
 

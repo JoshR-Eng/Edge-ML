@@ -28,7 +28,6 @@ BASE_FLAGS = [
     f"--memPoolSize=workspace:{WORKSPACE_MB}MiB",
     "--tacticSources=+CUBLAS,+CUBLAS_LT,+CUDNN",  # all fast-math backends
     "--noDataTransfers",                            # measure compute time only
-    "--preview=+fasterDynamicShapes0805",           # TRT 8.5+ dynamic shape opt
 ]
 
 
