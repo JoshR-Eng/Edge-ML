@@ -26,7 +26,7 @@ import numpy as np
 
 
 class TRTInferencer:
-    """Loads a TensorRT engine and runs timed inference."""
+    """Loads a TensorRT engine and runs timed batch inference."""
 
     def __init__(self, engine_path: Path):
         # TensorRT and pycuda are only available on the Jetson, so we import

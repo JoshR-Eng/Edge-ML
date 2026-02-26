@@ -65,12 +65,3 @@ def make_batches(samples: List[np.ndarray], batch_size: int) -> List[np.ndarray]
         np.vstack(samples[i : i + batch_size])
         for i in range(0, len(samples), batch_size)
     ]
-    """
-    Tile the sample list to exactly pack_size entries.
-
-    Used to simulate a battery pack of N cells when we only have 13 test cells.
-    """
-    if len(samples) >= pack_size:
-        return samples[:pack_size]
-    repeats = (pack_size + len(samples) - 1) // len(samples)
-    return (samples * repeats)[:pack_size]
