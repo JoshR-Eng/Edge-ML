@@ -20,6 +20,12 @@
 #   ./test.sh v2 1        # 7W mode
 #   ./test.sh v2_b32 0    # MAXN mode  (32-cell pack engines)
 
+# Source guard: if this file is sourced instead of executed, re-run it as a
+# subshell so that 'set -e' can never exit the user's interactive SSH session.
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    bash "${BASH_SOURCE[0]}" "$@"; return
+fi
+
 set -e
 
 
@@ -84,14 +90,13 @@ echo ""
 
 SESSION_NAME="benchmarking_session"
 
-tmux has-session -t "$SESSION_NAME" 2>/dev/null
-if [ $? -ne 0 ]; then
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    echo "Reusing tmux session: $SESSION_NAME"
+else
     echo "Creating tmux session: $SESSION_NAME"
     # -e passes the current environment (including DISCORD_WEBHOOK_URL) into
     # the new session so notify.py can read it via os.getenv.
     tmux new-session -d -s "$SESSION_NAME" -e "DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL"
-else
-    echo "Reusing tmux session: $SESSION_NAME"
 fi
 
 # Run benchmark then notify via src/utils/notify.py on success or failure.
