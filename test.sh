@@ -99,9 +99,7 @@ tmux send-keys -t "$SESSION_NAME" "
 python3 benchmark.py \
     --models models/$MODELS \
     --data   data/tensor_qv \
-    --output results/$MODELS \
-&& python3 -c \"from src.utils.notify import send_notification; send_notification('✅ Benchmark complete — models/$MODELS\nResults: results/$MODELS/hardware_benchmark_raw.csv')\" \
-|| python3 -c \"from src.utils.notify import send_notification; send_notification('❌ Benchmark FAILED — models/$MODELS\nCheck: tmux attach -t $SESSION_NAME')\"
+    --output results/$MODELS
 " C-m
 
 
@@ -115,9 +113,6 @@ echo "  Results    :  results/$MODELS/hardware_benchmark_raw.csv"
 echo "  Power mode :  nvpmodel -m $POWER_MODE"
 echo ""
 echo "  Discord notification will be sent on completion."
-echo "  Closing SSH connection in 3 seconds..."
+echo "  You can safely disconnect now (Ctrl+D or close the terminal)."
 echo "============================================================"
-
-sleep 3
-kill -HUP $PPID
 

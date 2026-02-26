@@ -26,6 +26,7 @@ import numpy as np
 from src.benchmark.data       import load_test_cells, load_test_data, make_batches
 from src.benchmark.inferencer import TRTInferencer
 from src.benchmark.power      import PowerProfiler
+from src.utils.notify         import send_notification
 
 
 # Un-timed warm-up passes before each engine is benchmarked.
@@ -73,7 +74,7 @@ def benchmark_engine(
     precision = parts[1] if len(parts) == 2 else "unknown"
 
     # Start power logging immediately before the timed loop
-    log_path = output_dir / f"{engine_path.stem}_power.log"h
+    log_path = output_dir / f"{engine_path.stem}_power.log"
     profiler  = PowerProfiler()
     profiler.start(log_path)
 
@@ -135,6 +136,7 @@ def main() -> None:
     if write_header:
         writer.writeheader()
 
+    failed = []
     for engine_path in engine_files:
         print(f"{'─' * 60}")
         print(f"  Engine: {engine_path.name}")
@@ -144,12 +146,24 @@ def main() -> None:
             csv_file.flush()
         except Exception as e:
             print(f"  ERROR: {e}", file=sys.stderr)
+            failed.append(engine_path.name)
         print()
 
     csv_file.close()
     print(f"{'=' * 60}")
     print(f"  Done.  Results → {csv_path}")
     print(f"{'=' * 60}")
+
+    if failed:
+        send_notification(
+            f"❌ Benchmark finished with errors — {args.models}\n"
+            f"Failed: {', '.join(failed)}"
+        )
+    else:
+        send_notification(
+            f"✅ Benchmark complete — {args.models}\n"
+            f"Results: {csv_path}"
+        )
 
 
 if __name__ == "__main__":
