@@ -49,6 +49,4 @@ def send_notification(message):
         urllib.request.urlopen(req)
         print("Notification sent successfully.")
     except Exception as e:
-        print(f"Error sending notification: {e}"
-
-)
+        print(f"Error sending notification: {e}")
