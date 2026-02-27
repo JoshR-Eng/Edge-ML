@@ -7,7 +7,7 @@ Output: models/<folder>/<ModelName>/<ModelName>.cache
 """
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import torch
