@@ -1,0 +1,2 @@
+model,precision,batch_size,num_batches,mean_latency_ms,p50_latency_ms,p95_latency_ms,std_latency_ms,mean_power_mw,max_power_mw
+CNN-GRU,fp32,32,41,7.2361,7.2102,7.2379,0.1213,,

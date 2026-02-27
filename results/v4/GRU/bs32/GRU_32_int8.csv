@@ -1,0 +1,2 @@
+model,precision,batch_size,num_batches,mean_latency_ms,p50_latency_ms,p95_latency_ms,std_latency_ms,mean_power_mw,max_power_mw
+GRU,int8,32,41,5.3916,5.3752,5.4295,0.0967,,
