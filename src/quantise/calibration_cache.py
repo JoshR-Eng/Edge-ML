@@ -228,7 +228,7 @@ if __name__ == "__main__":
         print(f"ERROR: models/{folder} does not exist", file=sys.stderr)
         sys.exit(1)
 
-    onnx_files = sorted(models_dir.glob("*/*.onnx"))
+    onnx_files = sorted(models_dir.glob("*/*/*.onnx"))
     if not onnx_files:
         print(f"ERROR: no .onnx files found under {models_dir}", file=sys.stderr)
         sys.exit(1)
