@@ -19,13 +19,13 @@ import argparse
 import csv
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
 from src.benchmark.data       import load_test_cells, load_test_data, make_batches
 from src.benchmark.inferencer import TRTInferencer
-from src.benchmark.power      import PowerProfiler
+from src.benchmark.power      import PowerProfiler, parse_vdd_in
 from src.utils.notify         import send_notification
 
 
@@ -38,16 +38,16 @@ def benchmark_engine(
     engine_path: Path,
     samples:     List[np.ndarray],
     output_dir:  Path,
-) -> List[Dict]:
+) -> Optional[Dict]:
     """
-    Benchmark one engine and return a list of raw per-batch result dicts.
+    Benchmark one engine and return a summary stats dict.
 
-    The engine's batch size is read directly from its binding shape:
-      - batch=1  → single-cell scenario; one inference per Q-V curve
-      - batch=32 → 32-cell pack scenario; 32 curves inferred in one GPU call
+    Writes a single-row CSV to:
+        output_dir/<model>/bs<batch_size>/<model>_<batch_size>_<precision>.csv
 
-    Each dict contains: engine, model, precision, batch_size, batch_idx,
-    latency_ms.  Power is in a separate tegrastats .log file.
+    Also appends the same stats to the master summary CSV at output_dir root.
+
+    Returns the stats dict, or None on failure.
     """
     print(f"  Loading engine ...")
     inferencer = TRTInferencer(engine_path)
@@ -61,11 +61,6 @@ def benchmark_engine(
     for _ in range(WARMUP_RUNS):
         inferencer.infer(warmup_input)
 
-    # Group samples into (batch_size, 120) arrays.
-    # For batch=1 this is just the original list of (1, 120) arrays.
-    # For batch=32 this tiles 13 test cells to the nearest multiple of 32
-    # and stacks them — valid for latency benchmarking since timing depends
-    # on arithmetic load, not which specific cells are in the batch.
     batches = make_batches(samples, batch_size)
 
     # Parse model name and precision from filename: CNN-LSTM_int8.engine
@@ -73,27 +68,50 @@ def benchmark_engine(
     model     = parts[0]
     precision = parts[1] if len(parts) == 2 else "unknown"
 
-    # Start power logging immediately before the timed loop
-    log_path = output_dir / f"{engine_path.stem}_power.log"
+    # Temp power log written to the engine's own directory
+    log_path = engine_path.parent / f"{engine_path.stem}_power.log"
     profiler  = PowerProfiler()
     profiler.start(log_path)
 
-    rows = []
-    for idx, batch in enumerate(batches):
+    latencies = []
+    for batch in batches:
         _, latency_ms = inferencer.infer(batch)
-        rows.append({
-            "engine":     engine_path.name,
-            "model":      model,
-            "precision":  precision,
-            "batch_size": batch_size,
-            "batch_idx":  idx,
-            "latency_ms": round(latency_ms, 4),
-        })
+        latencies.append(latency_ms)
 
     profiler.stop()
 
-    print(f"  {len(rows)} batches × {batch_size} cells  |  power log → {log_path.name}")
-    return rows
+    # Parse power log then remove the raw file
+    mean_power, max_power = parse_vdd_in(log_path)
+    log_path.unlink(missing_ok=True)
+
+    # Latency summary statistics
+    arr = np.array(latencies)
+    stats = {
+        "model":           model,
+        "precision":       precision,
+        "batch_size":      batch_size,
+        "num_batches":     len(latencies),
+        "mean_latency_ms": round(float(np.mean(arr)),           4),
+        "p50_latency_ms":  round(float(np.percentile(arr, 50)), 4),
+        "p95_latency_ms":  round(float(np.percentile(arr, 95)), 4),
+        "std_latency_ms":  round(float(np.std(arr)),            4),
+        "mean_power_mw":   round(mean_power, 1) if mean_power is not None else None,
+        "max_power_mw":    round(max_power,  1) if max_power  is not None else None,
+    }
+
+    # Per-engine CSV: output_dir/<model>/bs<batch_size>/<model>_<batch_size>_<precision>.csv
+    csv_dir = output_dir / model / f"bs{batch_size}"
+    csv_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = csv_dir / f"{model}_{batch_size}_{precision}.csv"
+
+    fieldnames = list(stats.keys())
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerow(stats)
+
+    print(f"  {len(latencies)} batches * {batch_size} cells  |  CSV >> {csv_path.relative_to(output_dir)}")
+    return stats
 
 
 def main() -> None:
@@ -106,7 +124,7 @@ def main() -> None:
     parser.add_argument("--data",   type=Path, required=True,
                         help="Directory of .pt test tensors (e.g. data/tensor_qv)")
     parser.add_argument("--output", type=Path, default=Path("results"),
-                        help="Directory for CSV and power logs (default: results/)")
+                        help="Directory for CSV outputs (default: results/)")
     args = parser.parse_args()
 
     repo_root  = Path(__file__).resolve().parent
@@ -126,43 +144,45 @@ def main() -> None:
         sys.exit(1)
     print(f"Found {len(engine_files)} engine(s)\n")
 
-    # Open CSV in append mode — repeated runs accumulate in one file.
-    # batch_size in each row distinguishes single-cell (1) from pack (32) engines.
-    csv_path     = output_dir / "hardware_benchmark_raw.csv"
-    fieldnames   = ["engine", "model", "precision", "batch_size", "batch_idx", "latency_ms"]
-    write_header = not csv_path.exists()
-    csv_file     = open(csv_path, "a", newline="")
-    writer       = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    # Master summary CSV at the output root — one row per engine
+    fieldnames  = ["model", "precision", "batch_size", "num_batches",
+                   "mean_latency_ms", "p50_latency_ms", "p95_latency_ms",
+                   "std_latency_ms", "mean_power_mw", "max_power_mw"]
+    master_path = output_dir / "master_benchmark_summary.csv"
+    write_header = not master_path.exists()
+    master_file  = open(master_path, "a", newline="")
+    master_writer = csv.DictWriter(master_file, fieldnames=fieldnames)
     if write_header:
-        writer.writeheader()
+        master_writer.writeheader()
 
     failed = []
     for engine_path in engine_files:
-        print(f"{'─' * 60}")
+        print(f"{'-' * 60}")
         print(f"  Engine: {engine_path.name}")
         try:
-            rows = benchmark_engine(engine_path, samples, output_dir)
-            writer.writerows(rows)
-            csv_file.flush()
+            stats = benchmark_engine(engine_path, samples, output_dir)
+            if stats:
+                master_writer.writerow(stats)
+                master_file.flush()
         except Exception as e:
             print(f"  ERROR: {e}", file=sys.stderr)
             failed.append(engine_path.name)
         print()
 
-    csv_file.close()
+    master_file.close()
     print(f"{'=' * 60}")
-    print(f"  Done.  Results → {csv_path}")
+    print(f"  Done.  Master summary >> {master_path}")
     print(f"{'=' * 60}")
 
     if failed:
         send_notification(
-            f"❌ Benchmark finished with errors — {args.models}\n"
+            f"Benchmark finished with errors - {args.models}\n"
             f"Failed: {', '.join(failed)}"
         )
     else:
         send_notification(
-            f"✅ Benchmark complete — {args.models}\n"
-            f"Results: {csv_path}"
+            f"Benchmark complete - {args.models}\n"
+            f"Master summary: {master_path}"
         )
 
 
