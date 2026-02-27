@@ -119,7 +119,7 @@ def main() -> None:
     samples  = load_test_data(args.data, cell_ids)
     print()
 
-    engine_files = sorted(args.models.glob("*/*.engine"))
+    engine_files = sorted(args.models.glob("*/*/*.engine"))
 
     if not engine_files:
         print(f"ERROR: no .engine files found under {args.models}", file=sys.stderr)
