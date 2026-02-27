@@ -1,0 +1,7 @@
+{"Layers": ["Reformatting CopyNode for Input Tensor 0 to {ForeignNode[(Unnamed Layer* 41) [Constant].../Squeeze]}"
+,"{ForeignNode[(Unnamed Layer* 41) [Constant].../Squeeze]}"
+,"Reformatting CopyNode for Output Tensor 0 to {ForeignNode[(Unnamed Layer* 41) [Constant].../Squeeze]}"
+],
+"Bindings": ["input"
+,"capacity"
+]}

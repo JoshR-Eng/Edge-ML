@@ -1,0 +1,288 @@
+/usr/src/tensorrt/bin/trtexec --onnx=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.onnx --saveEngine=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU_int8.engine --int8 --fp16 --exportLayerInfo=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/logs/quantisation_int8_layers.json --memPoolSize=workspace:4096MiB --tacticSources=+CUBLAS,+CUBLAS_LT,+CUDNN --noDataTransfers --calib=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.cache
+
+&&&& RUNNING TensorRT.trtexec [TensorRT v8502] # /usr/src/tensorrt/bin/trtexec --onnx=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.onnx --saveEngine=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU_int8.engine --int8 --fp16 --exportLayerInfo=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/logs/quantisation_int8_layers.json --memPoolSize=workspace:4096MiB --tacticSources=+CUBLAS,+CUBLAS_LT,+CUDNN --noDataTransfers --calib=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.cache
+[02/27/2026-11:00:02] [I] === Model Options ===
+[02/27/2026-11:00:02] [I] Format: ONNX
+[02/27/2026-11:00:02] [I] Model: /home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.onnx
+[02/27/2026-11:00:02] [I] Output:
+[02/27/2026-11:00:02] [I] === Build Options ===
+[02/27/2026-11:00:02] [I] Max batch: explicit batch
+[02/27/2026-11:00:02] [I] Memory Pools: workspace: 4096 MiB, dlaSRAM: default, dlaLocalDRAM: default, dlaGlobalDRAM: default
+[02/27/2026-11:00:02] [I] minTiming: 1
+[02/27/2026-11:00:02] [I] avgTiming: 8
+[02/27/2026-11:00:02] [I] Precision: FP32+FP16+INT8
+[02/27/2026-11:00:02] [I] LayerPrecisions: 
+[02/27/2026-11:00:02] [I] Calibration: /home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.cache
+[02/27/2026-11:00:02] [I] Refit: Disabled
+[02/27/2026-11:00:02] [I] Sparsity: Disabled
+[02/27/2026-11:00:02] [I] Safe mode: Disabled
+[02/27/2026-11:00:02] [I] DirectIO mode: Disabled
+[02/27/2026-11:00:02] [I] Restricted mode: Disabled
+[02/27/2026-11:00:02] [I] Build only: Disabled
+[02/27/2026-11:00:02] [I] Save engine: /home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU_int8.engine
+[02/27/2026-11:00:02] [I] Load engine: 
+[02/27/2026-11:00:02] [I] Profiling verbosity: 0
+[02/27/2026-11:00:02] [I] Tactic sources: cublas [ON], cublasLt [ON], cudnn [ON], 
+[02/27/2026-11:00:02] [I] timingCacheMode: local
+[02/27/2026-11:00:02] [I] timingCacheFile: 
+[02/27/2026-11:00:02] [I] Heuristic: Disabled
+[02/27/2026-11:00:02] [I] Preview Features: Use default preview flags.
+[02/27/2026-11:00:02] [I] Input(s)s format: fp32:CHW
+[02/27/2026-11:00:02] [I] Output(s)s format: fp32:CHW
+[02/27/2026-11:00:02] [I] Input build shapes: model
+[02/27/2026-11:00:02] [I] Input calibration shapes: model
+[02/27/2026-11:00:02] [I] === System Options ===
+[02/27/2026-11:00:02] [I] Device: 0
+[02/27/2026-11:00:02] [I] DLACore: 
+[02/27/2026-11:00:02] [I] Plugins:
+[02/27/2026-11:00:02] [I] === Inference Options ===
+[02/27/2026-11:00:02] [I] Batch: Explicit
+[02/27/2026-11:00:02] [I] Input inference shapes: model
+[02/27/2026-11:00:02] [I] Iterations: 10
+[02/27/2026-11:00:02] [I] Duration: 3s (+ 200ms warm up)
+[02/27/2026-11:00:02] [I] Sleep time: 0ms
+[02/27/2026-11:00:02] [I] Idle time: 0ms
+[02/27/2026-11:00:02] [I] Streams: 1
+[02/27/2026-11:00:02] [I] ExposeDMA: Disabled
+[02/27/2026-11:00:02] [I] Data transfers: Disabled
+[02/27/2026-11:00:02] [I] Spin-wait: Disabled
+[02/27/2026-11:00:02] [I] Multithreading: Disabled
+[02/27/2026-11:00:02] [I] CUDA Graph: Disabled
+[02/27/2026-11:00:02] [I] Separate profiling: Disabled
+[02/27/2026-11:00:02] [I] Time Deserialize: Disabled
+[02/27/2026-11:00:02] [I] Time Refit: Disabled
+[02/27/2026-11:00:02] [I] NVTX verbosity: 0
+[02/27/2026-11:00:02] [I] Persistent Cache Ratio: 0
+[02/27/2026-11:00:02] [I] Inputs:
+[02/27/2026-11:00:02] [I] === Reporting Options ===
+[02/27/2026-11:00:02] [I] Verbose: Disabled
+[02/27/2026-11:00:02] [I] Averages: 10 inferences
+[02/27/2026-11:00:02] [I] Percentiles: 90,95,99
+[02/27/2026-11:00:02] [I] Dump refittable layers:Disabled
+[02/27/2026-11:00:02] [I] Dump output: Disabled
+[02/27/2026-11:00:02] [I] Profile: Disabled
+[02/27/2026-11:00:02] [I] Export timing to JSON file: 
+[02/27/2026-11:00:02] [I] Export output to JSON file: 
+[02/27/2026-11:00:02] [I] Export profile to JSON file: 
+[02/27/2026-11:00:02] [I] 
+[02/27/2026-11:00:02] [I] === Device Information ===
+[02/27/2026-11:00:02] [I] Selected Device: Orin
+[02/27/2026-11:00:02] [I] Compute Capability: 8.7
+[02/27/2026-11:00:02] [I] SMs: 4
+[02/27/2026-11:00:02] [I] Compute Clock Rate: 0.624 GHz
+[02/27/2026-11:00:02] [I] Device Global Memory: 3425 MiB
+[02/27/2026-11:00:02] [I] Shared Memory per SM: 164 KiB
+[02/27/2026-11:00:02] [I] Memory Bus Width: 128 bits (ECC disabled)
+[02/27/2026-11:00:02] [I] Memory Clock Rate: 0.624 GHz
+[02/27/2026-11:00:02] [I] 
+[02/27/2026-11:00:02] [I] TensorRT version: 8.5.2
+[02/27/2026-11:00:03] [I] [TRT] [MemUsageChange] Init CUDA: CPU +220, GPU +0, now: CPU 249, GPU 1620 (MiB)
+[02/27/2026-11:00:05] [I] [TRT] [MemUsageChange] Init builder kernel library: CPU +302, GPU +229, now: CPU 574, GPU 1851 (MiB)
+[02/27/2026-11:00:05] [I] Start parsing network model
+[02/27/2026-11:00:05] [I] [TRT] ----------------------------------------------------------------
+[02/27/2026-11:00:05] [I] [TRT] Input filename:   /home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.onnx
+[02/27/2026-11:00:05] [I] [TRT] ONNX IR version:  0.0.7
+[02/27/2026-11:00:05] [I] [TRT] Opset version:    12
+[02/27/2026-11:00:05] [I] [TRT] Producer name:    pytorch
+[02/27/2026-11:00:05] [I] [TRT] Producer version: 2.5.1
+[02/27/2026-11:00:05] [I] [TRT] Domain:           
+[02/27/2026-11:00:05] [I] [TRT] Model version:    0
+[02/27/2026-11:00:05] [I] [TRT] Doc string:       
+[02/27/2026-11:00:05] [I] [TRT] ----------------------------------------------------------------
+[02/27/2026-11:00:05] [W] [TRT] onnx2trt_utils.cpp:375: Your ONNX model has been generated with INT64 weights, while TensorRT does not natively support INT64. Attempting to cast down to INT32.
+[02/27/2026-11:00:05] [I] Finish parsing network model
+[02/27/2026-11:00:05] [I] [TRT] Reading Calibration Cache for calibrator: EntropyCalibration2
+[02/27/2026-11:00:05] [I] [TRT] Generated calibration scales using calibration cache. Make sure that calibration cache has latest scales.
+[02/27/2026-11:00:05] [I] [TRT] To regenerate calibration cache, please delete the existing one. TensorRT will generate a new calibration cache.
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 21) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor /gru/Expand_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 29) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 30) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 37) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 40) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 41) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 42) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 53) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 55) [Iterator]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 56) [Shuffle]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 57) [Recurrence]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 58) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 59) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 60) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 61) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 62) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 63) [Activation]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 64) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 66) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 68) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 69) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 70) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 71) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 72) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 73) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 74) [Activation]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 75) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 76) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 77) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 78) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 79) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 93) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor /gru/Expand_1_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 101) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 102) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 109) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 112) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 113) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 114) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 125) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 127) [Iterator]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 128) [Shuffle]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 129) [Recurrence]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 130) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 131) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 132) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 133) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 134) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 135) [Activation]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 136) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 138) [Slice]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 140) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 141) [Matrix Multiply]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 142) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 143) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 144) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 145) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 146) [Activation]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 147) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 148) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 149) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 150) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 151) [ElementWise]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor (Unnamed Layer* 159) [Constant]_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [W] [TRT] Missing scale and zero-point for tensor capacity, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[02/27/2026-11:00:05] [I] [TRT] ---------- Layers Running on DLA ----------
+[02/27/2026-11:00:05] [I] [TRT] ---------- Layers Running on GPU ----------
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: /Unsqueeze + (Unnamed Layer* 1) [Shuffle]
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_between_(Unnamed Layer* 1) [Shuffle]_output_and_/cnn/cnn.0/Conv + /cnn/cnn.2/Relu
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] CONVOLUTION: /cnn/cnn.0/Conv + /cnn/cnn.2/Relu
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_after_/cnn/cnn.2/Relu_out_tensor
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_between_/cnn/cnn.2/Relu_out_tensor_and_/cnn/cnn.4/Conv + /cnn/cnn.6/Relu
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] CONVOLUTION: /cnn/cnn.4/Conv + /cnn/cnn.6/Relu
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_after_/cnn/cnn.6/Relu_out_tensor
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_between_/cnn/cnn.6/Relu_out_tensor_and_/cnn/cnn.8/Conv
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] CONVOLUTION: /cnn/cnn.8/Conv
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] SHUFFLE: shuffle_after_(Unnamed Layer* 10) [Convolution]_output
+[02/27/2026-11:00:05] [I] [TRT] [GpuLayer] MYELIN: {ForeignNode[(Unnamed Layer* 53) [Constant].../Squeeze]}
+[02/27/2026-11:00:07] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +534, GPU +809, now: CPU 1109, GPU 2661 (MiB)
+[02/27/2026-11:00:07] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +82, GPU +9, now: CPU 1191, GPU 2670 (MiB)
+[02/27/2026-11:00:07] [I] [TRT] Local timing cache in use. Profiling results in this builder pass will not be stored.
+[02/27/2026-11:00:39] [I] [TRT] Total Activation Memory: 4295030784
+[02/27/2026-11:00:39] [I] [TRT] Detected 1 inputs and 1 output network tensors.
+[02/27/2026-11:00:39] [I] [TRT] Total Host Persistent Memory: 9568
+[02/27/2026-11:00:39] [I] [TRT] Total Device Persistent Memory: 0
+[02/27/2026-11:00:39] [I] [TRT] Total Scratch Memory: 495104
+[02/27/2026-11:00:39] [I] [TRT] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 0 MiB, GPU 268 MiB
+[02/27/2026-11:00:39] [I] [TRT] [BlockAssignment] Started assigning block shifts. This will take 13 steps to complete.
+[02/27/2026-11:00:39] [I] [TRT] [BlockAssignment] Algorithm ShiftNTopDown took 0.35808ms to assign 3 blocks to 13 nodes requiring 526336 bytes.
+[02/27/2026-11:00:39] [I] [TRT] Total Activation Memory: 526336
+[02/27/2026-11:00:39] [W] [TRT] TensorRT encountered issues when converting weights between types and that could affect accuracy.
+[02/27/2026-11:00:39] [W] [TRT] If this is not the desired behavior, please modify the weights or retrain with regularization to adjust the magnitude of the weights.
+[02/27/2026-11:00:39] [W] [TRT] Check verbose logs for the list of affected weights.
+[02/27/2026-11:00:39] [W] [TRT] - 7 weights are affected by this issue: Detected subnormal FP16 values.
+[02/27/2026-11:00:39] [W] [TRT] - 1 weights are affected by this issue: Detected values less than smallest positive FP16 subnormal value and converted them to the FP16 minimum subnormalized value.
+[02/27/2026-11:00:39] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in building engine: CPU +0, GPU +4, now: CPU 0, GPU 4 (MiB)
+[02/27/2026-11:00:39] [I] Engine built in 36.824 sec.
+[02/27/2026-11:00:40] [I] [TRT] Loaded engine size: 0 MiB
+[02/27/2026-11:00:40] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in engine deserialization: CPU +0, GPU +0, now: CPU 0, GPU 0 (MiB)
+[02/27/2026-11:00:40] [I] Engine deserialized in 0.00883078 sec.
+[02/27/2026-11:00:40] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +0, GPU +0, now: CPU 0, GPU 0 (MiB)
+[02/27/2026-11:00:40] [I] Setting persistentCacheLimit to 0 bytes.
+[02/27/2026-11:00:40] [I] Using random values for input input
+[02/27/2026-11:00:40] [I] Created input binding for input with dimensions 1x120
+[02/27/2026-11:00:40] [I] Using random values for output capacity
+[02/27/2026-11:00:40] [I] Created output binding for capacity with dimensions 
+[02/27/2026-11:00:40] [I] [TRT] The profiling verbosity was set to ProfilingVerbosity::kLAYER_NAMES_ONLY when the engine was built, so only the layer names will be returned. Rebuild the engine with ProfilingVerbosity::kDETAILED to get more verbose layer information.
+[02/27/2026-11:00:40] [I] Starting inference
+[02/27/2026-11:00:43] [I] Warmup completed 42 queries over 200 ms
+[02/27/2026-11:00:43] [I] Timing trace has 636 queries over 3.00904 s
+[02/27/2026-11:00:43] [I] 
+[02/27/2026-11:00:43] [I] === Trace details ===
+[02/27/2026-11:00:43] [I] Trace averages of 10 runs:
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72403 ms - Host latency: 4.72403 ms (enqueue 4.71597 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71986 ms - Host latency: 4.71986 ms (enqueue 4.7117 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71617 ms - Host latency: 4.71617 ms (enqueue 4.70839 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71973 ms - Host latency: 4.71973 ms (enqueue 4.71212 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71064 ms - Host latency: 4.71064 ms (enqueue 4.70335 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71063 ms - Host latency: 4.71063 ms (enqueue 4.70319 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71271 ms - Host latency: 4.71271 ms (enqueue 4.70475 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71658 ms - Host latency: 4.71658 ms (enqueue 4.70874 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71245 ms - Host latency: 4.71245 ms (enqueue 4.70471 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72374 ms - Host latency: 4.72374 ms (enqueue 4.71545 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71889 ms - Host latency: 4.71889 ms (enqueue 4.71086 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71645 ms - Host latency: 4.71645 ms (enqueue 4.70805 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71523 ms - Host latency: 4.71523 ms (enqueue 4.70767 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71369 ms - Host latency: 4.71369 ms (enqueue 4.70602 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71637 ms - Host latency: 4.71637 ms (enqueue 4.7084 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71504 ms - Host latency: 4.71504 ms (enqueue 4.70703 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71758 ms - Host latency: 4.71758 ms (enqueue 4.70986 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71915 ms - Host latency: 4.71915 ms (enqueue 4.71077 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7084 ms - Host latency: 4.7084 ms (enqueue 4.70074 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71808 ms - Host latency: 4.71808 ms (enqueue 4.71022 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.714 ms - Host latency: 4.714 ms (enqueue 4.7063 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72217 ms - Host latency: 4.72217 ms (enqueue 4.71359 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72268 ms - Host latency: 4.72268 ms (enqueue 4.71394 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.70963 ms - Host latency: 4.70963 ms (enqueue 4.70223 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71757 ms - Host latency: 4.71757 ms (enqueue 4.70803 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71339 ms - Host latency: 4.71339 ms (enqueue 4.70601 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71211 ms - Host latency: 4.71211 ms (enqueue 4.70491 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71802 ms - Host latency: 4.71802 ms (enqueue 4.70905 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7179 ms - Host latency: 4.7179 ms (enqueue 4.71013 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72102 ms - Host latency: 4.72102 ms (enqueue 4.71288 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71802 ms - Host latency: 4.71802 ms (enqueue 4.71072 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71686 ms - Host latency: 4.71686 ms (enqueue 4.70875 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7192 ms - Host latency: 4.7192 ms (enqueue 4.71056 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71655 ms - Host latency: 4.71655 ms (enqueue 4.70869 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71228 ms - Host latency: 4.71228 ms (enqueue 4.70339 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71379 ms - Host latency: 4.71379 ms (enqueue 4.70616 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71074 ms - Host latency: 4.71074 ms (enqueue 4.70358 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7151 ms - Host latency: 4.7151 ms (enqueue 4.70728 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71353 ms - Host latency: 4.71353 ms (enqueue 4.70582 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71382 ms - Host latency: 4.71382 ms (enqueue 4.70625 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71462 ms - Host latency: 4.71462 ms (enqueue 4.70654 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71934 ms - Host latency: 4.71934 ms (enqueue 4.71223 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7136 ms - Host latency: 4.7136 ms (enqueue 4.70588 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71396 ms - Host latency: 4.71396 ms (enqueue 4.70647 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.72158 ms - Host latency: 4.72158 ms (enqueue 4.71304 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71294 ms - Host latency: 4.71294 ms (enqueue 4.70466 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71201 ms - Host latency: 4.71201 ms (enqueue 4.70378 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71296 ms - Host latency: 4.71296 ms (enqueue 4.70557 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71265 ms - Host latency: 4.71265 ms (enqueue 4.70537 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71553 ms - Host latency: 4.71553 ms (enqueue 4.70815 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71257 ms - Host latency: 4.71257 ms (enqueue 4.7054 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71597 ms - Host latency: 4.71597 ms (enqueue 4.70835 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.78608 ms - Host latency: 4.78608 ms (enqueue 4.74968 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71992 ms - Host latency: 4.71992 ms (enqueue 4.76394 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71375 ms - Host latency: 4.71375 ms (enqueue 4.705 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71555 ms - Host latency: 4.71555 ms (enqueue 4.7073 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.7071 ms - Host latency: 4.7071 ms (enqueue 4.69949 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71021 ms - Host latency: 4.71021 ms (enqueue 4.70208 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71074 ms - Host latency: 4.71074 ms (enqueue 4.70295 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.70947 ms - Host latency: 4.70947 ms (enqueue 4.70129 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71323 ms - Host latency: 4.71323 ms (enqueue 4.70503 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71609 ms - Host latency: 4.71609 ms (enqueue 4.70803 ms)
+[02/27/2026-11:00:43] [I] Average on 10 runs - GPU latency: 4.71868 ms - Host latency: 4.71868 ms (enqueue 4.71052 ms)
+[02/27/2026-11:00:43] [I] 
+[02/27/2026-11:00:43] [I] === Performance summary ===
+[02/27/2026-11:00:43] [I] Throughput: 211.363 qps
+[02/27/2026-11:00:43] [I] Latency: min = 4.69409 ms, max = 5.052 ms, mean = 4.71652 ms, median = 4.71432 ms, percentile(90%) = 4.72876 ms, percentile(95%) = 4.73309 ms, percentile(99%) = 4.7406 ms
+[02/27/2026-11:00:43] [I] Enqueue Time: min = 4.68677 ms, max = 5.01611 ms, mean = 4.70897 ms, median = 4.70654 ms, percentile(90%) = 4.72095 ms, percentile(95%) = 4.72534 ms, percentile(99%) = 4.73676 ms
+[02/27/2026-11:00:43] [I] H2D Latency: min = 0 ms, max = 0 ms, mean = 0 ms, median = 0 ms, percentile(90%) = 0 ms, percentile(95%) = 0 ms, percentile(99%) = 0 ms
+[02/27/2026-11:00:43] [I] GPU Compute Time: min = 4.69409 ms, max = 5.052 ms, mean = 4.71652 ms, median = 4.71432 ms, percentile(90%) = 4.72876 ms, percentile(95%) = 4.73309 ms, percentile(99%) = 4.7406 ms
+[02/27/2026-11:00:43] [I] D2H Latency: min = 0 ms, max = 0 ms, mean = 0 ms, median = 0 ms, percentile(90%) = 0 ms, percentile(95%) = 0 ms, percentile(99%) = 0 ms
+[02/27/2026-11:00:43] [I] Total Host Walltime: 3.00904 s
+[02/27/2026-11:00:43] [I] Total GPU Compute Time: 2.99971 s
+[02/27/2026-11:00:43] [W] * Throughput may be bound by Enqueue Time rather than GPU Compute and the GPU may be under-utilized.
+[02/27/2026-11:00:43] [W]   If not already in use, --useCudaGraph (utilize CUDA graphs where possible) may increase the throughput.
+[02/27/2026-11:00:43] [I] Explanations of the performance metrics are printed in the verbose logs.
+[02/27/2026-11:00:43] [I] 
+&&&& PASSED TensorRT.trtexec [TensorRT v8502] # /usr/src/tensorrt/bin/trtexec --onnx=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.onnx --saveEngine=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU_int8.engine --int8 --fp16 --exportLayerInfo=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/logs/quantisation_int8_layers.json --memPoolSize=workspace:4096MiB --tacticSources=+CUBLAS,+CUBLAS_LT,+CUDNN --noDataTransfers --calib=/home/user/Edge-ML/models/v4/CNN-GRU/bs1/CNN-GRU.cache

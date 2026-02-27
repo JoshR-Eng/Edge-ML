@@ -1,0 +1,7 @@
+{"Layers": ["Reformatting CopyNode for Input Tensor 0 to {ForeignNode[onnx::LSTM_209.../Squeeze]}"
+,"{ForeignNode[onnx::LSTM_209.../Squeeze]}"
+,"Reformatting CopyNode for Output Tensor 0 to {ForeignNode[onnx::LSTM_209.../Squeeze]}"
+],
+"Bindings": ["input"
+,"capacity"
+]}
