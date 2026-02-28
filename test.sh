@@ -18,7 +18,6 @@
 # EXAMPLES:
 #   ./test.sh v2          # MAXN mode  (single-cell engines)
 #   ./test.sh v2 1        # 7W mode
-#   ./test.sh v2_b32 0    # MAXN mode  (32-cell pack engines)
 
 # Source guard: if this file is sourced instead of executed, re-run it as a
 # subshell so that 'set -e' can never exit the user's interactive SSH session.
@@ -38,7 +37,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-MODELS="$1"
+TARGET_DIR="$1"
 POWER_MODE="${2:-0}"
 
 if ! [[ "$POWER_MODE" =~ ^[0-9]+$ ]]; then
@@ -71,7 +70,7 @@ fi
 # --- Hardware state ----------------------------------------------------------
 
 echo "Requesting sudo to lock hardware state..."
-sudo -v   # pre-authenticate so subsequent sudo calls don't prompt mid-script
+sudo -v   # pre-authenticate so future sudo calls don't prompt mid-script
 
 # Set power envelope first, then lock clocks.
 # jetson_clocks fixes CPU/GPU/memory to their max frequency *within* the
@@ -86,38 +85,18 @@ echo "Hardware state locked."
 echo ""
 
 
-# --- tmux session ------------------------------------------------------------
-
-SESSION_NAME="benchmarking_session"
-
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "Reusing tmux session: $SESSION_NAME"
-else
-    echo "Creating tmux session: $SESSION_NAME"
-    # -e passes the current environment (including DISCORD_WEBHOOK_URL) into
-    # the new session so notify.py can read it via os.getenv.
-    tmux new-session -d -s "$SESSION_NAME" -e "DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL"
-fi
-
-# Run benchmark then notify via src/utils/notify.py on success or failure.
-tmux send-keys -t "$SESSION_NAME" "
-python3 benchmark.py \
-    --models models/$MODELS \
-    --data   data/tensor_qv \
-    --output results/$MODELS
-" C-m
+# --- Execute benchmark -------------------------------------------------------
+echo "    Starting Python Benchmark..."
+python benchmark.py --dir "$TARGET_DIR"
 
 
 # --- Disconnect --------------------------------------------------------------
 
 echo "============================================================"
-echo "  Setup complete. Benchmark is running in tmux."
+echo "  Benchmark Complete!"
 echo ""
-echo "  Reconnect  :  tmux attach -t $SESSION_NAME"
 echo "  Results    :  results/$MODELS/hardware_benchmark_raw.csv"
 echo "  Power mode :  nvpmodel -m $POWER_MODE"
 echo ""
-echo "  Discord notification will be sent on completion."
-echo "  You can safely disconnect now (Ctrl+D or close the terminal)."
 echo "============================================================"
 
