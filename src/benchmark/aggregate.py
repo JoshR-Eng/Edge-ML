@@ -113,11 +113,11 @@ def aggregate(results_dir: Path) -> None:
             n_cells = sum(1 for k in acc if k.startswith("cell_"))
             break
 
-    cell_cols = [f"cell_{i+1:02d}_rmse" for i in range(n_cells)]
+    cell_cols = [f"cell_{i+1:02d}_rmse_ah" for i in range(n_cells)]
 
     fieldnames = [
         "model", "precision", "batch_size",
-        "global_rmse", "global_maxe",
+        "global_rmse_ah", "global_maxe_ah",
         *cell_cols,
         "p95_latency_ms", "mean_latency_ms",
         "throughput_cells_per_sec", "norm_latency_ms_per_cell",
@@ -151,13 +151,13 @@ def aggregate(results_dir: Path) -> None:
         norm_lat = float(lat["norm_latency_ms_per_cell"]) if lat else None
 
         # Accuracy fields
-        global_rmse = float(acc["global"]["rmse"]) if acc and "global" in acc else None
-        global_maxe = float(acc["global"]["max_abs_error"]) if acc and "global" in acc else None
+        global_rmse = float(acc["global"]["rmse_ah"]) if acc and "global" in acc else None
+        global_maxe = float(acc["global"]["max_abs_error_ah"]) if acc and "global" in acc else None
 
         cell_rmse_vals = []
         for i in range(n_cells):
             key = f"cell_{i+1:02d}"
-            val = float(acc[key]["rmse"]) if acc and key in acc else None
+            val = float(acc[key]["rmse_ah"]) if acc and key in acc else None
             cell_rmse_vals.append(val)
 
         # Power fields
@@ -174,8 +174,8 @@ def aggregate(results_dir: Path) -> None:
             "model":                    model,
             "precision":                precision,
             "batch_size":               batch_size,
-            "global_rmse":              global_rmse,
-            "global_maxe":              global_maxe,
+            "global_rmse_ah":           global_rmse,
+            "global_maxe_ah":           global_maxe,
             "p95_latency_ms":           p95_lat,
             "mean_latency_ms":          mean_lat,
             "throughput_cells_per_sec": thru,

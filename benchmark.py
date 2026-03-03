@@ -79,35 +79,37 @@ def _write_latency_csv(path: Path, mean_lat: float, p95_lat: float,
 
 
 def _write_accuracy_csv(path: Path, preds: np.ndarray, y: np.ndarray,
-                         boundaries: list) -> None:
+                         boundaries: list, nominal_capacity: float) -> None:
     rows = []
 
-    # Global metrics across all 1300 samples
-    diff = preds - y
-    global_rmse = float(np.sqrt(np.mean(diff ** 2)))
-    global_mae  = float(np.mean(np.abs(diff)))
-    global_maxe = float(np.max(np.abs(diff)))
+    # Denormalise: predictions and y are in 0-1 range; convert to Ah
+    # so results match batt_ml eval.txt units directly
+    diff_ah = (preds - y) * nominal_capacity
+
+    global_rmse = float(np.sqrt(np.mean(diff_ah ** 2)))
+    global_mae  = float(np.mean(np.abs(diff_ah)))
+    global_maxe = float(np.max(np.abs(diff_ah)))
     rows.append({
         "cell": "global",
-        "rmse": round(global_rmse, 6),
-        "mae":  round(global_mae,  6),
-        "max_abs_error": round(global_maxe, 6),
+        "rmse_ah": round(global_rmse, 6),
+        "mae_ah":  round(global_mae,  6),
+        "max_abs_error_ah": round(global_maxe, 6),
         "n_samples": len(preds),
     })
 
     # Per-cell metrics
     for i, (start, end) in enumerate(boundaries):
-        d = preds[start:end] - y[start:end]
+        d_ah = (preds[start:end] - y[start:end]) * nominal_capacity
         rows.append({
             "cell": f"cell_{i+1:02d}",
-            "rmse": round(float(np.sqrt(np.mean(d ** 2))), 6),
-            "mae":  round(float(np.mean(np.abs(d))),        6),
-            "max_abs_error": round(float(np.max(np.abs(d))), 6),
+            "rmse_ah": round(float(np.sqrt(np.mean(d_ah ** 2))), 6),
+            "mae_ah":  round(float(np.mean(np.abs(d_ah))),        6),
+            "max_abs_error_ah": round(float(np.max(np.abs(d_ah))), 6),
             "n_samples": end - start,
         })
 
     with open(path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["cell", "rmse", "mae", "max_abs_error", "n_samples"])
+        writer = csv.DictWriter(f, fieldnames=["cell", "rmse_ah", "mae_ah", "max_abs_error_ah", "n_samples"])
         writer.writeheader()
         writer.writerows(rows)
 
@@ -217,11 +219,12 @@ def main() -> None:
             out_dir / "latency.csv",
             mean_lat, p95_lat, throughput, norm_lat, n_iters,
         )
-        _write_accuracy_csv(out_dir / "accuracy.csv", preds, y, boundaries)
+        _write_accuracy_csv(out_dir / "accuracy.csv", preds, y, boundaries, NOMINAL_CAPACITY)
 
+        global_rmse_ah = float(np.sqrt(np.mean(((preds - y) * NOMINAL_CAPACITY) ** 2)))
         print(f"           mean={mean_lat:.3f}ms  p95={p95_lat:.3f}ms  "
               f"throughput={throughput:.1f} cells/s  "
-              f"global_rmse={float(np.sqrt(np.mean((preds - y)**2))):.4f}")
+              f"global_rmse={global_rmse_ah:.4f} Ah")
 
     # ------------------------------------------------------------------
     # 4. Aggregate all engine results into summary.csv
