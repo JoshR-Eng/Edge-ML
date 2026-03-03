@@ -1,2 +1,2 @@
 mean_latency_ms,p95_latency_ms,throughput_cells_per_sec,norm_latency_ms_per_cell,n_iters
-4.4494,4.4742,224.7488,4.4494,1300
+4.4518,4.478,224.6276,4.4518,1300
