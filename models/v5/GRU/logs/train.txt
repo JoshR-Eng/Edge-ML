@@ -1,0 +1,38 @@
+
+ --- Training Experiment: v5/GRU ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.000054 | Val RMSE: 0.00610
+	Epoch 020/150 | Train Loss: 0.000022 | Val RMSE: 0.00332
+	Epoch 030/150 | Train Loss: 0.000015 | Val RMSE: 0.00803
+	Epoch 040/150 | Train Loss: 0.000024 | Val RMSE: 0.00204
+	Epoch 050/150 | Train Loss: 0.000014 | Val RMSE: 0.00303
+	Epoch 060/150 | Train Loss: 0.000008 | Val RMSE: 0.00311
+	Epoch 070/150 | Train Loss: 0.000005 | Val RMSE: 0.00170
+	Epoch 080/150 | Train Loss: 0.000003 | Val RMSE: 0.00096
+
+Early stopping at epoch 88 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 95.9s
+	Best RMSE: 0.00093
+	Model Saved: /home/joshr/batt_ml/results/v5/GRU/GRU.pth
+
+Exporting GRU
+	Batch size: 1
+	File Path : ./results/v5/GRU/bs1/GRU.onnx
+Exporting to ONNX (batch_size=1) -> './results/v5/GRU/bs1/GRU.onnx' ...
+	Successfully Exported!
+
+Exporting GRU
+	Batch size: 32
+	File Path : ./results/v5/GRU/bs32/GRU.onnx
+Exporting to ONNX (batch_size=32) -> './results/v5/GRU/bs32/GRU.onnx' ...
+	Successfully Exported!
+
+Exporting GRU
+	Batch size: 96
+	File Path : ./results/v5/GRU/bs96/GRU.onnx
+Exporting to ONNX (batch_size=96) -> './results/v5/GRU/bs96/GRU.onnx' ...
+	Successfully Exported!

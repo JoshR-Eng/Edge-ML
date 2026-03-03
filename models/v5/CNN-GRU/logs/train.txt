@@ -1,0 +1,38 @@
+
+ --- Training Experiment: v5/CNN-GRU ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.002956 | Val RMSE: 0.02189
+	Epoch 020/150 | Train Loss: 0.002174 | Val RMSE: 0.09802
+	Epoch 030/150 | Train Loss: 0.001629 | Val RMSE: 0.04498
+	Epoch 040/150 | Train Loss: 0.001538 | Val RMSE: 0.02557
+	Epoch 050/150 | Train Loss: 0.001415 | Val RMSE: 0.03545
+	Epoch 060/150 | Train Loss: 0.001278 | Val RMSE: 0.01042
+	Epoch 070/150 | Train Loss: 0.001203 | Val RMSE: 0.03669
+	Epoch 080/150 | Train Loss: 0.001229 | Val RMSE: 0.02182
+
+Early stopping at epoch 80 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 124.0s
+	Best RMSE: 0.01042
+	Model Saved: /home/joshr/batt_ml/results/v5/CNN-GRU/CNN-GRU.pth
+
+Exporting CNN-GRU
+	Batch size: 1
+	File Path : ./results/v5/CNN-GRU/bs1/CNN-GRU.onnx
+Exporting to ONNX (batch_size=1) -> './results/v5/CNN-GRU/bs1/CNN-GRU.onnx' ...
+	Successfully Exported!
+
+Exporting CNN-GRU
+	Batch size: 32
+	File Path : ./results/v5/CNN-GRU/bs32/CNN-GRU.onnx
+Exporting to ONNX (batch_size=32) -> './results/v5/CNN-GRU/bs32/CNN-GRU.onnx' ...
+	Successfully Exported!
+
+Exporting CNN-GRU
+	Batch size: 96
+	File Path : ./results/v5/CNN-GRU/bs96/CNN-GRU.onnx
+Exporting to ONNX (batch_size=96) -> './results/v5/CNN-GRU/bs96/CNN-GRU.onnx' ...
+	Successfully Exported!

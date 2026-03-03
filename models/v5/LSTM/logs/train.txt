@@ -1,0 +1,43 @@
+
+ --- Training Experiment: v5/LSTM ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.012500 | Val RMSE: 0.07051
+	Epoch 020/150 | Train Loss: 0.000274 | Val RMSE: 0.01517
+	Epoch 030/150 | Train Loss: 0.000051 | Val RMSE: 0.00703
+	Epoch 040/150 | Train Loss: 0.000046 | Val RMSE: 0.00572
+	Epoch 050/150 | Train Loss: 0.000042 | Val RMSE: 0.00409
+	Epoch 060/150 | Train Loss: 0.000030 | Val RMSE: 0.00364
+	Epoch 070/150 | Train Loss: 0.000057 | Val RMSE: 0.00621
+	Epoch 080/150 | Train Loss: 0.000013 | Val RMSE: 0.00403
+	Epoch 090/150 | Train Loss: 0.000007 | Val RMSE: 0.00209
+	Epoch 100/150 | Train Loss: 0.000006 | Val RMSE: 0.00197
+	Epoch 110/150 | Train Loss: 0.000005 | Val RMSE: 0.00315
+	Epoch 120/150 | Train Loss: 0.000005 | Val RMSE: 0.00191
+	Epoch 130/150 | Train Loss: 0.000004 | Val RMSE: 0.00167
+	Epoch 140/150 | Train Loss: 0.000004 | Val RMSE: 0.00151
+	Epoch 150/150 | Train Loss: 0.000003 | Val RMSE: 0.00145
+
+Done!
+
+ 	Total Time: 160.2s
+	Best RMSE: 0.00134
+	Model Saved: /home/joshr/batt_ml/results/v5/LSTM/LSTM.pth
+
+Exporting LSTM
+	Batch size: 1
+	File Path : ./results/v5/LSTM/bs1/LSTM.onnx
+Exporting to ONNX (batch_size=1) -> './results/v5/LSTM/bs1/LSTM.onnx' ...
+	Successfully Exported!
+
+Exporting LSTM
+	Batch size: 32
+	File Path : ./results/v5/LSTM/bs32/LSTM.onnx
+Exporting to ONNX (batch_size=32) -> './results/v5/LSTM/bs32/LSTM.onnx' ...
+	Successfully Exported!
+
+Exporting LSTM
+	Batch size: 96
+	File Path : ./results/v5/LSTM/bs96/LSTM.onnx
+Exporting to ONNX (batch_size=96) -> './results/v5/LSTM/bs96/LSTM.onnx' ...
+	Successfully Exported!

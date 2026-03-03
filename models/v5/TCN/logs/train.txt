@@ -1,0 +1,33 @@
+
+ --- Training Experiment: v5/TCN ---
+
+Starting Training Loop...
+	Epoch 010/150 | Train Loss: 0.001948 | Val RMSE: 0.03351
+	Epoch 020/150 | Train Loss: 0.001554 | Val RMSE: 0.10748
+	Epoch 030/150 | Train Loss: 0.001269 | Val RMSE: 0.01388
+
+Early stopping at epoch 34 (no improvement for 20 epochs)
+
+Done!
+
+ 	Total Time: 44.7s
+	Best RMSE: 0.00867
+	Model Saved: /home/joshr/batt_ml/results/v5/TCN/TCN.pth
+
+Exporting TCN
+	Batch size: 1
+	File Path : ./results/v5/TCN/bs1/TCN.onnx
+Exporting to ONNX (batch_size=1) -> './results/v5/TCN/bs1/TCN.onnx' ...
+	Successfully Exported!
+
+Exporting TCN
+	Batch size: 32
+	File Path : ./results/v5/TCN/bs32/TCN.onnx
+Exporting to ONNX (batch_size=32) -> './results/v5/TCN/bs32/TCN.onnx' ...
+	Successfully Exported!
+
+Exporting TCN
+	Batch size: 96
+	File Path : ./results/v5/TCN/bs96/TCN.onnx
+Exporting to ONNX (batch_size=96) -> './results/v5/TCN/bs96/TCN.onnx' ...
+	Successfully Exported!

@@ -1,0 +1,33 @@
+
+ --- Evaluation Experiment: v5/TCN ---
+Evaluating Cell Data: Validation Cells
+   Cell 18 | RMSE: 0.0165 Ah | MAE: 0.0129 Ah | MAPE: 1.25%
+   Cell 26 | RMSE: 0.0157 Ah | MAE: 0.0121 Ah | MAPE: 3.19%
+   Cell 27 | RMSE: 0.0208 Ah | MAE: 0.0171 Ah | MAPE: 1.16%
+   Cell 38 | RMSE: 0.0263 Ah | MAE: 0.0229 Ah | MAPE: 2.86%
+   Cell 40 | RMSE: 0.0199 Ah | MAE: 0.0160 Ah | MAPE: 1.06%
+   Cell 43 | RMSE: 0.0133 Ah | MAE: 0.0103 Ah | MAPE: 1.15%
+   Cell 53 | RMSE: 0.0329 Ah | MAE: 0.0253 Ah | MAPE: 3.96%
+   Cell 55 | RMSE: 0.0154 Ah | MAE: 0.0125 Ah | MAPE: 1.03%
+   Cell 57 | RMSE: 0.0190 Ah | MAE: 0.0174 Ah | MAPE: 0.90%
+   Cell 60 | RMSE: 0.0118 Ah | MAE: 0.0092 Ah | MAPE: 0.99%
+   Cell 64 | RMSE: 0.0244 Ah | MAE: 0.0199 Ah | MAPE: 1.38%
+   Cell 73 | RMSE: 0.0236 Ah | MAE: 0.0186 Ah | MAPE: 1.34%
+   Plot saved to: ./results/v5/TCN/results_Validation Cells.png
+   Average Validation Cells RMSE: 0.0200 Ah
+Evaluating Cell Data: Test Cells
+   Cell 03 | RMSE: 0.0170 Ah | MAE: 0.0135 Ah | MAPE: 1.19%
+   Cell 04 | RMSE: 0.0149 Ah | MAE: 0.0116 Ah | MAPE: 1.05%
+   Cell 08 | RMSE: 0.0136 Ah | MAE: 0.0111 Ah | MAPE: 1.13%
+   Cell 20 | RMSE: 0.0167 Ah | MAE: 0.0135 Ah | MAPE: 0.91%
+   Cell 21 | RMSE: 0.0173 Ah | MAE: 0.0141 Ah | MAPE: 1.20%
+   Cell 29 | RMSE: 0.0186 Ah | MAE: 0.0133 Ah | MAPE: 3.13%
+   Cell 32 | RMSE: 0.0258 Ah | MAE: 0.0223 Ah | MAPE: 2.83%
+   Cell 44 | RMSE: 0.0239 Ah | MAE: 0.0190 Ah | MAPE: 1.03%
+   Cell 45 | RMSE: 0.0355 Ah | MAE: 0.0292 Ah | MAPE: 4.56%
+   Cell 51 | RMSE: 0.0157 Ah | MAE: 0.0124 Ah | MAPE: 1.34%
+   Cell 56 | RMSE: 0.0134 Ah | MAE: 0.0105 Ah | MAPE: 0.91%
+   Cell 61 | RMSE: 0.0178 Ah | MAE: 0.0133 Ah | MAPE: 1.38%
+   Cell 76 | RMSE: 0.0210 Ah | MAE: 0.0168 Ah | MAPE: 1.17%
+   Plot saved to: ./results/v5/TCN/results_Test Cells.png
+   Average Test Cells RMSE: 0.0193 Ah

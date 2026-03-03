@@ -1,0 +1,33 @@
+
+ --- Evaluation Experiment: v5/CNN-LSTM ---
+Evaluating Cell Data: Validation Cells
+   Cell 18 | RMSE: 0.0191 Ah | MAE: 0.0153 Ah | MAPE: 1.38%
+   Cell 26 | RMSE: 0.0173 Ah | MAE: 0.0139 Ah | MAPE: 4.75%
+   Cell 27 | RMSE: 0.0211 Ah | MAE: 0.0152 Ah | MAPE: 1.06%
+   Cell 38 | RMSE: 0.0134 Ah | MAE: 0.0112 Ah | MAPE: 1.37%
+   Cell 40 | RMSE: 0.0159 Ah | MAE: 0.0122 Ah | MAPE: 0.91%
+   Cell 43 | RMSE: 0.0166 Ah | MAE: 0.0134 Ah | MAPE: 1.31%
+   Cell 53 | RMSE: 0.0388 Ah | MAE: 0.0330 Ah | MAPE: 5.94%
+   Cell 55 | RMSE: 0.0153 Ah | MAE: 0.0111 Ah | MAPE: 0.89%
+   Cell 57 | RMSE: 0.0183 Ah | MAE: 0.0141 Ah | MAPE: 0.72%
+   Cell 60 | RMSE: 0.0193 Ah | MAE: 0.0161 Ah | MAPE: 1.94%
+   Cell 64 | RMSE: 0.0287 Ah | MAE: 0.0181 Ah | MAPE: 1.34%
+   Cell 73 | RMSE: 0.0447 Ah | MAE: 0.0351 Ah | MAPE: 2.59%
+   Plot saved to: ./results/v5/CNN-LSTM/results_Validation Cells.png
+   Average Validation Cells RMSE: 0.0224 Ah
+Evaluating Cell Data: Test Cells
+   Cell 03 | RMSE: 0.0184 Ah | MAE: 0.0126 Ah | MAPE: 1.08%
+   Cell 04 | RMSE: 0.0215 Ah | MAE: 0.0150 Ah | MAPE: 1.30%
+   Cell 08 | RMSE: 0.0223 Ah | MAE: 0.0161 Ah | MAPE: 1.93%
+   Cell 20 | RMSE: 0.0131 Ah | MAE: 0.0105 Ah | MAPE: 0.84%
+   Cell 21 | RMSE: 0.0194 Ah | MAE: 0.0132 Ah | MAPE: 1.09%
+   Cell 29 | RMSE: 0.0177 Ah | MAE: 0.0143 Ah | MAPE: 4.76%
+   Cell 32 | RMSE: 0.0141 Ah | MAE: 0.0118 Ah | MAPE: 1.51%
+   Cell 44 | RMSE: 0.0330 Ah | MAE: 0.0274 Ah | MAPE: 1.50%
+   Cell 45 | RMSE: 0.0407 Ah | MAE: 0.0363 Ah | MAPE: 5.65%
+   Cell 51 | RMSE: 0.0207 Ah | MAE: 0.0143 Ah | MAPE: 1.41%
+   Cell 56 | RMSE: 0.0182 Ah | MAE: 0.0143 Ah | MAPE: 1.20%
+   Cell 61 | RMSE: 0.0244 Ah | MAE: 0.0178 Ah | MAPE: 1.81%
+   Cell 76 | RMSE: 0.0239 Ah | MAE: 0.0199 Ah | MAPE: 1.48%
+   Plot saved to: ./results/v5/CNN-LSTM/results_Test Cells.png
+   Average Test Cells RMSE: 0.0221 Ah

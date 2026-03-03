@@ -1,0 +1,33 @@
+
+ --- Evaluation Experiment: v5/GRU ---
+Evaluating Cell Data: Validation Cells
+   Cell 18 | RMSE: 0.0024 Ah | MAE: 0.0017 Ah | MAPE: 0.15%
+   Cell 26 | RMSE: 0.0026 Ah | MAE: 0.0020 Ah | MAPE: 0.49%
+   Cell 27 | RMSE: 0.0018 Ah | MAE: 0.0014 Ah | MAPE: 0.11%
+   Cell 38 | RMSE: 0.0028 Ah | MAE: 0.0021 Ah | MAPE: 0.19%
+   Cell 40 | RMSE: 0.0016 Ah | MAE: 0.0013 Ah | MAPE: 0.10%
+   Cell 43 | RMSE: 0.0022 Ah | MAE: 0.0016 Ah | MAPE: 0.15%
+   Cell 53 | RMSE: 0.0025 Ah | MAE: 0.0021 Ah | MAPE: 0.35%
+   Cell 55 | RMSE: 0.0018 Ah | MAE: 0.0014 Ah | MAPE: 0.12%
+   Cell 57 | RMSE: 0.0023 Ah | MAE: 0.0022 Ah | MAPE: 0.11%
+   Cell 60 | RMSE: 0.0026 Ah | MAE: 0.0018 Ah | MAPE: 0.16%
+   Cell 64 | RMSE: 0.0019 Ah | MAE: 0.0014 Ah | MAPE: 0.11%
+   Cell 73 | RMSE: 0.0020 Ah | MAE: 0.0017 Ah | MAPE: 0.15%
+   Plot saved to: ./results/v5/GRU/results_Validation Cells.png
+   Average Validation Cells RMSE: 0.0022 Ah
+Evaluating Cell Data: Test Cells
+   Cell 03 | RMSE: 0.0024 Ah | MAE: 0.0018 Ah | MAPE: 0.14%
+   Cell 04 | RMSE: 0.0024 Ah | MAE: 0.0016 Ah | MAPE: 0.13%
+   Cell 08 | RMSE: 0.0022 Ah | MAE: 0.0014 Ah | MAPE: 0.15%
+   Cell 20 | RMSE: 0.0026 Ah | MAE: 0.0021 Ah | MAPE: 0.15%
+   Cell 21 | RMSE: 0.0022 Ah | MAE: 0.0016 Ah | MAPE: 0.13%
+   Cell 29 | RMSE: 0.0027 Ah | MAE: 0.0017 Ah | MAPE: 0.42%
+   Cell 32 | RMSE: 0.0027 Ah | MAE: 0.0020 Ah | MAPE: 0.17%
+   Cell 44 | RMSE: 0.0037 Ah | MAE: 0.0036 Ah | MAPE: 0.20%
+   Cell 45 | RMSE: 0.0025 Ah | MAE: 0.0021 Ah | MAPE: 0.28%
+   Cell 51 | RMSE: 0.0015 Ah | MAE: 0.0011 Ah | MAPE: 0.12%
+   Cell 56 | RMSE: 0.0020 Ah | MAE: 0.0015 Ah | MAPE: 0.12%
+   Cell 61 | RMSE: 0.0027 Ah | MAE: 0.0020 Ah | MAPE: 0.18%
+   Cell 76 | RMSE: 0.0019 Ah | MAE: 0.0016 Ah | MAPE: 0.13%
+   Plot saved to: ./results/v5/GRU/results_Test Cells.png
+   Average Test Cells RMSE: 0.0024 Ah
