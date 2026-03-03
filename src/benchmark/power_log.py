@@ -9,7 +9,7 @@ extract power consumption data.
 # =================================================
 import subprocess
 import time
-from libpath import Path
+from pathlib import Path
 
 
 # =================================================
@@ -23,7 +23,7 @@ class TegrastatsLogger:
             log_path (Path): Desired path of log file
             interval_ms (int): Sampling interval in milliseconds
         """
-        self.log_file = log_file
+        self.log_file = log_path
         self.interval_ms = interval_ms
         self.process = None
 
