@@ -234,7 +234,7 @@ def main() -> None:
         f"Summary -> results/{FOLDER}/summary.csv"
     )
     print(f"\n[benchmark] {msg}")
-    send_notification(f"{msg}")
+    send_notification(f"{msg}", DISCORD_URL)
 
 
 if __name__ == "__main__":

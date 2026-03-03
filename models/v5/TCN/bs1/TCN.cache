@@ -1,0 +1,34 @@
+TRT-8502-EntropyCalibration2
+input: 3c980e00
+/Unsqueeze_output_0: 3c980e00
+(Unnamed Layer* 1) [Shuffle]_output: 3c980e00
+(Unnamed Layer* 2) [Convolution]_output: 3dabab05
+/block1/block1.0/Conv_output_0: 3dabab05
+/block1/block1.2/Relu_output_0: 3dd2248c
+(Unnamed Layer* 5) [Shuffle]_output: 3dd2248c
+(Unnamed Layer* 6) [Pooling]_output: 3dd2248c
+/block1/block1.3/MaxPool_output_0: 3dd2248c
+(Unnamed Layer* 8) [Shuffle]_output: 3dd2248c
+(Unnamed Layer* 9) [Convolution]_output: 3d9be818
+/block2/block2.0/Conv_output_0: 3d9be818
+/block2/block2.2/Relu_output_0: 3dabaa4b
+(Unnamed Layer* 12) [Shuffle]_output: 3dabaa4b
+(Unnamed Layer* 13) [Pooling]_output: 3dabaa4b
+/block2/block2.3/MaxPool_output_0: 3dabaa4b
+(Unnamed Layer* 15) [Shuffle]_output: 3dabaa4b
+(Unnamed Layer* 16) [Convolution]_output: 3d98cdda
+/block3/block3.0/Conv_output_0: 3d98cdda
+/block3/block3.2/Relu_output_0: 3d5e6975
+/block3/block3.3/GlobalAveragePool_output_0: 3c87f93b
+/fc/fc.0/Flatten_output_0: 3c87f93b
+(Unnamed Layer* 21) [Constant]_output: 3ab485eb
+(Unnamed Layer* 22) [Matrix Multiply]_output: 3c5f9862
+(Unnamed Layer* 23) [Constant]_output: 3a740816
+(Unnamed Layer* 24) [Shuffle]_output: 3a740816
+/fc/fc.1/Gemm_output_0: 3c6d9088
+/fc/fc.2/Relu_output_0: 3c80c36a
+(Unnamed Layer* 27) [Constant]_output: 3ad04453
+(Unnamed Layer* 28) [Matrix Multiply]_output: 3bb76533
+(Unnamed Layer* 29) [Constant]_output: 3b126da6
+(Unnamed Layer* 30) [Shuffle]_output: 3b126da6
+/fc/fc.4/Gemm_output_0: 3c005721

@@ -1,0 +1,22 @@
+TRT-8502-EntropyCalibration2
+input: 3c965967
+/Unsqueeze_output_0: 3c965967
+/lstm/Transpose_output_0: 3c965967
+(Unnamed Layer* 34) [Constant]_output: 3a9cccbb
+(Unnamed Layer* 35) [Shuffle]_output: 3a9cccbb
+(Unnamed Layer* 36) [Reduce]_output: 3af99929
+/lstm/LSTM_output_0: 3c0bddf2
+/lstm/Squeeze_output_0: 3c0bddf2
+(Unnamed Layer* 107) [Constant]_output: 3ad958e2
+(Unnamed Layer* 108) [Shuffle]_output: 3ad958e2
+(Unnamed Layer* 109) [Reduce]_output: 3b5d98cb
+/lstm/LSTM_1_output_0: 3c005881
+/lstm/Squeeze_1_output_0: 3c005881
+/lstm/Transpose_1_output_0: 3c005881
+/Gather_output_0: 3c0b119c
+(Unnamed Layer* 151) [Constant]_output: 3a942ef4
+(Unnamed Layer* 152) [Matrix Multiply]_output: 3bfc425c
+(Unnamed Layer* 153) [Constant]_output: 3576df91
+(Unnamed Layer* 154) [Shuffle]_output: 3576df91
+/fc/Gemm_output_0: 3bfc7e61
+capacity: 3bfc7e61

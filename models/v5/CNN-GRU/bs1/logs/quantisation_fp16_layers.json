@@ -1,0 +1,17 @@
+{"Layers": ["/Unsqueeze + (Unnamed Layer* 1) [Shuffle]"
+,"shuffle_between_(Unnamed Layer* 1) [Shuffle]_output_and_/cnn/cnn.0/Conv + /cnn/cnn.2/Relu"
+,"Reformatting CopyNode for Input Tensor 0 to /cnn/cnn.0/Conv + /cnn/cnn.2/Relu"
+,"/cnn/cnn.0/Conv + /cnn/cnn.2/Relu"
+,"shuffle_after_/cnn/cnn.2/Relu_out_tensor"
+,"shuffle_between_/cnn/cnn.2/Relu_out_tensor_and_/cnn/cnn.4/Conv + /cnn/cnn.6/Relu"
+,"/cnn/cnn.4/Conv + /cnn/cnn.6/Relu"
+,"shuffle_after_/cnn/cnn.6/Relu_out_tensor"
+,"shuffle_between_/cnn/cnn.6/Relu_out_tensor_and_/cnn/cnn.8/Conv"
+,"/cnn/cnn.8/Conv"
+,"Reformatting CopyNode for Input Tensor 0 to shuffle_after_(Unnamed Layer* 10) [Convolution]_output"
+,"shuffle_after_(Unnamed Layer* 10) [Convolution]_output"
+,"{ForeignNode[(Unnamed Layer* 53) [Constant].../Squeeze]}"
+],
+"Bindings": ["input"
+,"capacity"
+]}
