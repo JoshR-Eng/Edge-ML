@@ -22,14 +22,7 @@ import json
 #                          FUNCTIONS
 #=============================================================
 
-def send_notification(message):
-
-    # Fetch the secret webhook URL from environment variables
-    try:
-        webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
-    except Exception as e:
-        print(f"Error fetching webhook URL: {e}")
-        return
+def send_notification(message, webhook_url):
 
     if not webhook_url:
         print("No Discord webhook URL found in environment.")

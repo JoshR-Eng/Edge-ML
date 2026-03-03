@@ -38,6 +38,7 @@ fi
 
 FOLDER="$1"
 POWER_MODE="${2:-0}"
+RUN_NAME="${FOLDER}_powm${POWER_MODE}"
 
 if ! [[ "$POWER_MODE" =~ ^[0-9]+$ ]]; then
     echo "Error: power_mode must be a number (0 = MAXN, 1 = 7W)"
@@ -45,7 +46,7 @@ if ! [[ "$POWER_MODE" =~ ^[0-9]+$ ]]; then
 fi
 
 echo "============================================================"
-echo "  Jetson Benchmark  ->  models/$FOLDER"
+echo "  Jetson Benchmark  ->  models/$FOLDER  (results: $RUN_NAME)"
 echo "  Power mode        ->  nvpmodel -m $POWER_MODE"
 echo "============================================================"
 
@@ -57,9 +58,10 @@ if [ -d ".venv" ]; then
 fi
 
 if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+  set -a
+  source .env
+  set +a
 fi
-
 
 # --- Hardware state ----------------------------------------------------------
 
@@ -73,12 +75,12 @@ echo ""
 
 # --- Run benchmark -----------------------------------------------------------
 
-BENCHMARK_FOLDER="$FOLDER" python benchmark.py
+BENCHMARK_FOLDER="$FOLDER" BENCHMARK_RUN_NAME="$RUN_NAME" python benchmark.py
 
 
 # --- Done --------------------------------------------------------------------
 
 echo ""
 echo "============================================================"
-echo "  Complete!  Results -> results/$FOLDER/"
+echo "  Complete!  Results -> results/$RUN_NAME/"
 echo "============================================================"

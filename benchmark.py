@@ -26,6 +26,7 @@ USAGE:
 import csv
 import os
 from pathlib import Path
+from time import sleep
 
 import numpy as np
 
@@ -42,6 +43,9 @@ from src.utils.notify           import send_notification
 # =========================================================================
 
 FOLDER           = os.environ.get("BENCHMARK_FOLDER", "v4")
+RUN_NAME         = os.environ.get("BENCHMARK_RUN_NAME", FOLDER)
+ # for notifications (optional)...
+DISCORD_URL      = os.environ.get("DISCORD_WEBHOOK_URL", None)
 
 MODELS_DIR       = Path("models") / FOLDER
 DATA_DIR         = Path("data/tensor_qv")
@@ -50,7 +54,7 @@ SPLIT            = "test"
 NOMINAL_CAPACITY = 2.4        # Ah — used to normalise y labels
 
 WARMUP_ITERS     = 50         # Iterations before timed benchmark (discarded)
-RESULTS_DIR      = Path("results") / FOLDER
+RESULTS_DIR      = Path("results") / RUN_NAME
 
 
 # =========================================================================
@@ -113,8 +117,16 @@ def _write_accuracy_csv(path: Path, preds: np.ndarray, y: np.ndarray,
 # =========================================================================
 
 def main() -> None:
-    print(f"[benchmark] Folder : {FOLDER}")
-    print(f"[benchmark] Split  : {SPLIT}")
+    print(f"[benchmark] Folder  : {FOLDER}")
+    print(f"[benchmark] Run name: {RUN_NAME}")
+    print(f"[benchmark] Split   : {SPLIT}")
+
+
+    # Add a small delay so that you could use something like tmux to 
+    # detach and disconnect from ssh to remove some overhead
+    delay = 10
+    print(f"\n\tScript will run in {delay}s")
+    sleep(delay)
 
     # ------------------------------------------------------------------
     # 1. Pre-load all test data into RAM
