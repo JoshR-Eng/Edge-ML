@@ -75,7 +75,15 @@ echo ""
 
 # --- Run benchmark -----------------------------------------------------------
 
-BENCHMARK_FOLDER="$FOLDER" BENCHMARK_RUN_NAME="$RUN_NAME" sudo python3 benchmark.py
+# Export Bash variables so they can pass to sudo
+export BENCHMARK_FOLDER="$FOLDER" 
+export BENCHMARK_RUN_NAME="$RUN_NAME" 
+
+# Find exact python intepreter inside .venv
+VENV_PYTHON=$(which python3)
+
+# Run sudo -E flag to pass env variables to sudo user
+sudo -E "$VENV_PYTHON" benchmark.py
 
 
 # --- Done --------------------------------------------------------------------
