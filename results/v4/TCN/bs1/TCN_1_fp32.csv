@@ -1,2 +1,0 @@
-model,precision,batch_size,num_batches,mean_latency_ms,p50_latency_ms,p95_latency_ms,std_latency_ms,mean_power_mw,max_power_mw
-TCN,fp32,1,1300,0.1816,0.183,0.1919,0.0164,,

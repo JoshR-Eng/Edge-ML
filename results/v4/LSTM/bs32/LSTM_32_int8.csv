@@ -1,2 +1,0 @@
-model,precision,batch_size,num_batches,mean_latency_ms,p50_latency_ms,p95_latency_ms,std_latency_ms,mean_power_mw,max_power_mw
-LSTM,int8,32,41,5.5963,5.5754,5.6336,0.0972,,

@@ -1,2 +1,0 @@
-model,precision,batch_size,num_batches,mean_latency_ms,p50_latency_ms,p95_latency_ms,std_latency_ms,mean_power_mw,max_power_mw
-GRU,fp16,32,41,5.3589,5.3388,5.3784,0.0993,,
