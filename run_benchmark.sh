@@ -74,7 +74,7 @@ sudo jetson_clocks           # locks clocks + sets fan to max within power mode
 sudo systemctl stop nvfancontrol 2>/dev/null || true
 
 # Set fan speed via sysfs PWM node (0=off, 178=~70%, 255=max)
-FAN_PWM=178
+FAN_PWM=127
 FAN_NODE=$(find /sys/devices/platform/pwm-fan -name "pwm1" 2>/dev/null | head -1)
 if [ -n "$FAN_NODE" ]; then
     sudo sh -c "echo $FAN_PWM > $FAN_NODE"
