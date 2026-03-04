@@ -69,6 +69,20 @@ echo "Locking hardware state (requires sudo)..."
 sudo -v
 sudo nvpmodel -m "$POWER_MODE"
 sudo jetson_clocks           # locks clocks + sets fan to max within power mode
+
+# Stop automatic fan controller so the manual PWM value sticks
+sudo systemctl stop nvfancontrol 2>/dev/null || true
+
+# Set fan speed via sysfs PWM node (0=off, 178=~70%, 255=max)
+FAN_PWM=178
+FAN_NODE=$(find /sys/devices/platform/pwm-fan -name "pwm1" 2>/dev/null | head -1)
+if [ -n "$FAN_NODE" ]; then
+    sudo sh -c "echo $FAN_PWM > $FAN_NODE"
+    echo "Fan set to PWM=$FAN_PWM / 255 (node: $FAN_NODE)"
+else
+    echo "Warning: fan PWM node not found — fan speed unchanged"
+fi
+
 echo "Hardware state locked."
 echo ""
 
@@ -87,6 +101,9 @@ sudo -E "$VENV_PYTHON" benchmark.py
 
 
 # --- Done --------------------------------------------------------------------
+
+# Restore automatic fan control
+sudo systemctl start nvfancontrol 2>/dev/null || true
 
 echo ""
 echo "============================================================"
