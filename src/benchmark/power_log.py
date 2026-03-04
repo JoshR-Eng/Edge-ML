@@ -45,6 +45,10 @@ class TegrastatsLogger:
                 ]
         self.process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+        # Wait one interval so tegrastats has initialised and written its
+        # first sample before inference begins.
+        time.sleep(self.interval_ms / 1000.0)
+
         return self
 
     

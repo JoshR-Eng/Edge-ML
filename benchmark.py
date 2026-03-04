@@ -1,9 +1,19 @@
 """
 DESCRIPTION:
-    Benchmarks all TensorRT .engine files found under MODELS_DIR.
-    For each engine, runs one full pass over the test split data,
-    scopes tegrastats power logging tightly around the inference loop,
-    then computes accuracy and latency metrics post-inference.
+    Benchmarks all TensorRT .engine files found under MODELS_DIR using a
+    two-pass methodology to eliminate the observer effect:
+
+    Pass 1 — Accuracy & Latency
+        Runs all test samples with no power-logging overhead.
+        Records per-sample predictions and wall-clock latencies.
+        Writes accuracy.csv and latency.csv.
+
+    Pass 2 — Steady-state Power
+        Loops inference for POWER_PASS_DURATION_S seconds with tegrastats
+        running. All predictions are discarded — only power.log is written.
+        Running for a fixed duration guarantees sufficient tegrastats samples
+        regardless of model speed (e.g. TCN bs=96 completes a dataset pass
+        in ~7ms but the 10s window yields ~200 samples at 50ms interval).
 
     Output per engine:
         results/<folder>/<model>/bs<N>/<precision>/
@@ -25,6 +35,7 @@ USAGE:
 
 import csv
 import os
+import time
 from pathlib import Path
 from time import sleep
 
@@ -53,7 +64,8 @@ CONFIGS_PATH     = Path("configs.yaml")
 SPLIT            = "test"
 NOMINAL_CAPACITY = 2.4        # Ah — used to normalise y labels
 
-WARMUP_ITERS     = 50         # Iterations before timed benchmark (discarded)
+WARMUP_ITERS          = 50    # Iterations before timed benchmark (discarded)
+POWER_PASS_DURATION_S = 10    # Seconds to run inference during power-only pass
 RESULTS_DIR      = Path("results") / RUN_NAME
 
 
@@ -183,24 +195,21 @@ def main() -> None:
         preds_buf  = np.empty(n_iters * bs if bs > 1 else n_iters, dtype=np.float32)
         latencies  = np.empty(n_iters, dtype=np.float64)
 
-        # -- Inference with tegrastats logging -------------------------
-        power_log_path = out_dir / "power.log"
-        with TegrastatsLogger(log_path=power_log_path):
-            if bs == 1:
-                for i in range(n_iters):
-                    out, lat      = trt.infer(X_run[i : i + 1])
-                    preds_buf[i]  = out[0]
-                    latencies[i]  = lat
-            else:
-                for i in range(n_iters):
-                    out, lat                          = trt.infer(X_run[i * bs : (i + 1) * bs])
-                    preds_buf[i * bs : (i + 1) * bs] = out.ravel()
-                    latencies[i]                      = lat
-        # tegrastats is now stopped - hardware metrics logging ends here
+        # ============================================================
+        # PASS 1 — Accuracy & Latency (no power-logging overhead)
+        # ============================================================
+        if bs == 1:
+            for i in range(n_iters):
+                out, lat      = trt.infer(X_run[i : i + 1])
+                preds_buf[i]  = out[0]
+                latencies[i]  = lat
+        else:
+            for i in range(n_iters):
+                out, lat                          = trt.infer(X_run[i * bs : (i + 1) * bs])
+                preds_buf[i * bs : (i + 1) * bs] = out.ravel()
+                latencies[i]                      = lat
 
-        del trt   # free GPU memory before loading next engine
-
-        # -- Post-inference calculations (hardware idle) --------------- 
+        # -- Post-Pass-1 calculations ----------------------------------
 
         # Flatten padded predictions and remove dummy outputs
         if bs > 1:
@@ -209,12 +218,12 @@ def main() -> None:
             preds = preds_buf
 
         # Latency stats
-        mean_lat  = float(np.mean(latencies))
-        p95_lat   = float(np.percentile(latencies, 95))
+        mean_lat   = float(np.mean(latencies))
+        p95_lat    = float(np.percentile(latencies, 95))
         throughput = bs / (mean_lat / 1000.0)           # cells / second
-        norm_lat  = mean_lat / bs                       # ms / cell
+        norm_lat   = mean_lat / bs                      # ms / cell
 
-        # Write logs
+        # Write accuracy and latency logs
         _write_latency_csv(
             out_dir / "latency.csv",
             mean_lat, p95_lat, throughput, norm_lat, n_iters,
@@ -225,6 +234,17 @@ def main() -> None:
         print(f"           mean={mean_lat:.3f}ms  p95={p95_lat:.3f}ms  "
               f"throughput={throughput:.1f} cells/s  "
               f"global_rmse={global_rmse_ah:.4f} Ah")
+
+        # ============================================================
+        # PASS 2 — Steady-state Power (time-bounded, outputs discarded)
+        # ============================================================
+        power_log_path = out_dir / "power.log"
+        deadline = time.perf_counter() + POWER_PASS_DURATION_S
+        with TegrastatsLogger(log_path=power_log_path):
+            while time.perf_counter() < deadline:
+                trt.infer(warmup_batch)
+
+        del trt   # free GPU memory before loading next engine
 
     # ------------------------------------------------------------------
     # 4. Aggregate all engine results into summary.csv
