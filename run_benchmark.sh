@@ -75,7 +75,7 @@ echo ""
 
 # --- Run benchmark -----------------------------------------------------------
 
-BENCHMARK_FOLDER="$FOLDER" BENCHMARK_RUN_NAME="$RUN_NAME" python benchmark.py
+BENCHMARK_FOLDER="$FOLDER" BENCHMARK_RUN_NAME="$RUN_NAME" sudo python3 benchmark.py
 
 
 # --- Done --------------------------------------------------------------------
