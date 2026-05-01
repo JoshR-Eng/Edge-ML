@@ -32,7 +32,7 @@ Battery-ML-Training  ──(ONNX exports)──►  Edge-ML (this repo)
    ONNX export                              Benchmarking on Jetson
 ```
 
-Models exported as `.onnx` from [Battery-ML-Training]{https://github.com/JoshR-Eng/Battery-ML-Training} are compiled here into `.engine` files in three precision formats:
+Models exported as `.onnx` from [Battery-ML-Training](https://github.com/JoshR-Eng/Battery-ML-Training) are compiled here into `.engine` files in three precision formats:
 
 | Precision | Description |
 |-----------|-------------|
